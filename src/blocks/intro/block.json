@@ -1,0 +1,8 @@
+{
+    "apiVersion": 3,
+    "title": "MVE Timeline Intro",
+    "name": "mve-timeline/intro",
+    "category": "widgets",
+    "icon": "smiley",
+    "editorScript": "file:./index.js"
+}
