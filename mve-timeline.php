@@ -13,7 +13,7 @@ add_action('init', function () {
     register_block_type(__DIR__ . '/build/blocks/year');
     //register_block_type(__DIR__ . '/build/blocks/instance');
     register_block_type(__DIR__ . '/build/blocks/intro');
-    //register_block_type(__DIR__ . '/build/blocks/image');
+    register_block_type(__DIR__ . '/build/blocks/image');
     register_block_type(__DIR__ . '/build/blocks/links');
 
 
@@ -69,6 +69,12 @@ add_action('init', function () {
         'show_in_rest' => true,
         'single' => true,
         'type' => 'integer'
+    ]);
+
+    register_post_meta('mve_timeline_item', 'mve_timeline_image_source', [
+        'show_in_rest' => true,
+        'single' => true,
+        'type' => 'string'
     ]);
 
     register_post_meta('mve_timeline_item', 'mve_timeline_intro', [
@@ -159,6 +165,7 @@ function mve_timeline_rest_get_timeline_items(WP_REST_Request $request)
             {$prefix}postmeta_year.meta_value as 'year',
             {$prefix}postmeta_intro.meta_value as 'intro',
             {$prefix}postmeta_links.meta_value as 'links',
+            {$prefix}postmeta_image_source.meta_value as 'image_source',
             concat('" . $dir['baseurl'] . "/', {$prefix}postmeta_image_url.meta_value) as 'image'
         from
         {$prefix}posts
@@ -166,12 +173,14 @@ function mve_timeline_rest_get_timeline_items(WP_REST_Request $request)
         inner join {$prefix}postmeta as {$prefix}postmeta_intro on {$prefix}postmeta_intro.post_id = {$prefix}posts.ID and {$prefix}postmeta_intro.meta_key = 'mve_timeline_intro'
         left join {$prefix}postmeta as {$prefix}postmeta_image on {$prefix}postmeta_image.post_id = {$prefix}posts.ID and {$prefix}postmeta_image.meta_key = 'mve_timeline_image'
         left join {$prefix}postmeta as {$prefix}postmeta_links on {$prefix}postmeta_links.post_id = {$prefix}posts.ID and {$prefix}postmeta_links.meta_key = 'mve_timeline_links'
+        left join {$prefix}postmeta as {$prefix}postmeta_image_source on {$prefix}postmeta_image_source.post_id = {$prefix}posts.ID and {$prefix}postmeta_image_source.meta_key = 'mve_timeline_image_source'
         left join {$prefix}postmeta as {$prefix}postmeta_image_url on {$prefix}postmeta_image_url.post_id = {$prefix}postmeta_image.meta_value and {$prefix}postmeta_image_url.meta_key = '_wp_attached_file'
         inner join {$prefix}term_relationships on {$prefix}term_relationships.object_id = {$prefix}posts.ID and {$prefix}term_relationships.term_taxonomy_id = %d
         where
         {$prefix}posts.post_status = 'publish'
         and {$prefix}posts.post_type = 'mve_timeline_item'
         order by year asc";
+        
 
     $results = $wpdb->get_results($wpdb->prepare($query, $request['id']));
 

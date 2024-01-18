@@ -26,10 +26,9 @@ registerPlugin('mve-timeline', {
 
         const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
-        console.log(meta);
-
         const year = meta['mve_timeline_year'];
         const imageId = meta['mve_timeline_image'];
+        const imageSource = meta['mve_timeline_image_source'] ?? '';
 
         const updateYear = (newValue) => {
             newValue = parseInt(newValue, 10);
@@ -37,7 +36,15 @@ registerPlugin('mve-timeline', {
         };
 
         const updateImageId = (newValue) => {
-            setMeta({ ...meta, mve_timeline_image: newValue ? newValue.id : null });
+            const obj = { ...meta, mve_timeline_image: newValue ? newValue.id : null };
+            if (!newValue) {
+                obj.mve_timeline_image_source = null;
+            }
+            setMeta(obj);
+        };
+
+        const updateImageSource = (newValue) => {
+            setMeta({ ...meta, mve_timeline_image_source: newValue });
         };
 
         const tags = useSelect((select) => {
@@ -102,6 +109,7 @@ registerPlugin('mve-timeline', {
                         />
 
                     </MediaUploadCheck>
+                    { image && <TextControl value={imageSource} onChange={updateImageSource} label="Image source" /> }
                 </VStack></PanelRow>
 
 

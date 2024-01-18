@@ -1,5 +1,5 @@
 import { registerBlockType } from '@wordpress/blocks';
-import { __experimentalText as Text, Card, CardBody } from '@wordpress/components';
+import { __experimentalText as Text, Card, CardBody, TextControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useBlockProps } from '@wordpress/block-editor';
@@ -24,13 +24,19 @@ registerBlockType('mve-timeline/year', {
 
         const metaFieldValue = meta['mve_timeline_year'];
 
+        const updateYear = (newValue) => {
+            newValue = parseInt(newValue, 10);
+            setMeta({ ...meta, mve_timeline_year: !isNaN(newValue) ? newValue : 0 });
+        };
+
         return (
             <div {...blockProps}>
-                <Card><CardBody>
-                <Text>{metaFieldValue ? metaFieldValue : 'Year?'}</Text>
-                <Text> - </Text>
-                <Text>{(tags && tags.length) ? tags[0].name : 'Timeline?'}</Text>
-                </CardBody></Card>
+                <TextControl onChange={updateYear} value={metaFieldValue} label="Year" />
+                {/* <Card><CardBody>
+                    <Text>{metaFieldValue ? metaFieldValue : 'Year?'}</Text>
+                    <Text> - </Text>
+                    <Text>{(tags && tags.length) ? tags[0].name : 'Timeline?'}</Text>
+                </CardBody></Card> */}
             </div>
         );
     },
