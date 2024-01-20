@@ -2,7 +2,7 @@ import { registerBlockType } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useBlockProps, RichText } from '@wordpress/block-editor';
-import { __experimentalText as Text } from '@wordpress/components';
+import { __experimentalText as Text, Card, CardBody, CardHeader, __experimentalHeading as Heading } from '@wordpress/components';
 
 
 registerBlockType('mve-timeline/intro', {
@@ -21,8 +21,11 @@ registerBlockType('mve-timeline/intro', {
         };
 
         return (
-            <div {...blockProps}>
-                <Text upperCase={true}>Intro</Text>
+            <Card {...blockProps}>
+                <CardHeader>
+                    <Heading level={4}>Intro</Heading>
+                </CardHeader>
+                <CardBody>
                 <RichText
                     placeholder="Intro..."
                     allowedFormats={['core/bold', 'core/italic', 'mve-timeline/internal-link']}
@@ -31,7 +34,8 @@ registerBlockType('mve-timeline/intro', {
                     onChange={updateMetaValue}
                     style={{backgroundColor: '#F0F0F0', padding: '1rem', border: '1px solid #C0C0C0'}}
                 />
-            </div>
+                </CardBody>
+            </Card>
         );
     },
 

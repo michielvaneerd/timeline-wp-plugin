@@ -16,7 +16,6 @@ add_action('init', function () {
     register_block_type(__DIR__ . '/build/blocks/image');
     register_block_type(__DIR__ . '/build/blocks/links');
 
-
     register_post_type('mve_timeline_item', [
         'labels' => [
             'name' => 'Timeline item'
@@ -41,6 +40,14 @@ add_action('init', function () {
                 ]
             ],
             [
+                'mve-timeline/image', [
+                    'lock' => [
+                        'move'   => true,
+                        'remove' => true
+                    ]
+                ]
+            ],
+            [
                 'mve-timeline/intro', [
                     'lock' => [
                         'move'   => true,
@@ -56,7 +63,8 @@ add_action('init', function () {
                     ]
                 ]
             ],
-        ]
+        ],
+        'template_lock' => 'all'
     ]);
 
     register_post_meta('mve_timeline_item', 'mve_timeline_year', [
@@ -72,6 +80,12 @@ add_action('init', function () {
     ]);
 
     register_post_meta('mve_timeline_item', 'mve_timeline_image_source', [
+        'show_in_rest' => true,
+        'single' => true,
+        'type' => 'string'
+    ]);
+
+    register_post_meta('mve_timeline_item', 'mve_timeline_image_info', [
         'show_in_rest' => true,
         'single' => true,
         'type' => 'string'
@@ -101,18 +115,22 @@ add_action('init', function () {
         'show_in_nav_menus' => true,
         'show_in_menu' => true,
     ]);
+
+    //$post_type_object = get_post_type_object( 'post' );
+    //echo '<pre>'; var_dump($post_type_object); exit;
+
 });
 
 // For plugins:
-add_action('enqueue_block_editor_assets', function () {
-    $asset_file = include(plugin_dir_path(__FILE__) . 'build/plugins/year/index.asset.php');
-    wp_enqueue_script(
-        'mve-timeline-year2',
-        plugins_url('build/plugins/year/index.js', __FILE__),
-        $asset_file['dependencies'],
-        $asset_file['version']
-    );
-});
+// add_action('enqueue_block_editor_assets', function () {
+//     $asset_file = include(plugin_dir_path(__FILE__) . 'build/plugins/year/index.asset.php');
+//     wp_enqueue_script(
+//         'mve-timeline-year2',
+//         plugins_url('build/plugins/year/index.js', __FILE__),
+//         $asset_file['dependencies'],
+//         $asset_file['version']
+//     );
+// });
 
 add_filter('single_template', function ($template) {
     global $post;
@@ -166,6 +184,7 @@ function mve_timeline_rest_get_timeline_items(WP_REST_Request $request)
             {$prefix}postmeta_intro.meta_value as 'intro',
             {$prefix}postmeta_links.meta_value as 'links',
             {$prefix}postmeta_image_source.meta_value as 'image_source',
+            {$prefix}postmeta_image_info.meta_value as 'image_info',
             concat('" . $dir['baseurl'] . "/', {$prefix}postmeta_image_url.meta_value) as 'image'
         from
         {$prefix}posts
@@ -174,6 +193,7 @@ function mve_timeline_rest_get_timeline_items(WP_REST_Request $request)
         left join {$prefix}postmeta as {$prefix}postmeta_image on {$prefix}postmeta_image.post_id = {$prefix}posts.ID and {$prefix}postmeta_image.meta_key = 'mve_timeline_image'
         left join {$prefix}postmeta as {$prefix}postmeta_links on {$prefix}postmeta_links.post_id = {$prefix}posts.ID and {$prefix}postmeta_links.meta_key = 'mve_timeline_links'
         left join {$prefix}postmeta as {$prefix}postmeta_image_source on {$prefix}postmeta_image_source.post_id = {$prefix}posts.ID and {$prefix}postmeta_image_source.meta_key = 'mve_timeline_image_source'
+        left join {$prefix}postmeta as {$prefix}postmeta_image_info on {$prefix}postmeta_image_info.post_id = {$prefix}posts.ID and {$prefix}postmeta_image_info.meta_key = 'mve_timeline_image_info'
         left join {$prefix}postmeta as {$prefix}postmeta_image_url on {$prefix}postmeta_image_url.post_id = {$prefix}postmeta_image.meta_value and {$prefix}postmeta_image_url.meta_key = '_wp_attached_file'
         inner join {$prefix}term_relationships on {$prefix}term_relationships.object_id = {$prefix}posts.ID and {$prefix}term_relationships.term_taxonomy_id = %d
         where
@@ -226,3 +246,15 @@ add_action('enqueue_block_assets', function() {
         );
     }
 });
+
+// add_filter('allowed_block_types', function($allowed_block_types, $post) {
+//     if ($post->post_type === 'mve_timeline_item') {
+//         return [
+//             'mve-timeline/year',
+//             'mve-timeline/image',
+//             'mve-timeline/intro',
+//             'mve-timeline/links'
+//         ];
+//     }
+//     return $allowed_block_types;
+// }, 10, 2);

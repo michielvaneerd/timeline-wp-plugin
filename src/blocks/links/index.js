@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useBlockProps } from '@wordpress/block-editor';
-import { __experimentalText as Text, TextControl, Button } from '@wordpress/components';
+import { __experimentalText as Text, TextControl, Button, Card, CardBody, CardHeader, __experimentalHeading as Heading } from '@wordpress/components';
 
 
 registerBlockType('mve-timeline/links', {
@@ -13,7 +13,8 @@ registerBlockType('mve-timeline/links', {
             (select) => select('core/editor').getCurrentPostType(),
             []
         );
-        const [value, setValue] = useState('');
+        const [valueName, setValueName] = useState('');
+        const [valueUrl, setValueUrl] = useState('');
 
         const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
@@ -21,34 +22,47 @@ registerBlockType('mve-timeline/links', {
         if (!metaFieldValue) {
             metaFieldValue = [];
         } else {
-            metaFieldValue = JSON.parse(metaFieldValue);
+            metaFieldValue = JSON.parse(metaFieldValue); // [{"name": "", "url": ""}]
         }
         const addMetaValue = () => {
-            metaFieldValue.push(value);
-            setMeta({...meta, mve_timeline_links: JSON.stringify(metaFieldValue)});
-            setValue('');
+            metaFieldValue.push({
+                name: valueName,
+                url: valueUrl
+            });
+            setMeta({ ...meta, mve_timeline_links: JSON.stringify(metaFieldValue) });
+            setValueName('');
+            setValueUrl('');
         };
         const removeMetaValue = (valueToRemove) => {
-            const index = metaFieldValue.indexOf(valueToRemove);
-            if (index > -1) {
-                metaFieldValue.splice(index, 1);
-                setMeta({...meta, mve_timeline_links: JSON.stringify(metaFieldValue)});
+            const newMetaFieldValue = [];
+            for (const val of metaFieldValue) {
+                if (val.name === valueToRemove.name && val.url === valueToRemove.url) {
+
+                } else {
+                    newMetaFieldValue.push(val);
+                }
             }
+            setMeta({ ...meta, mve_timeline_links: JSON.stringify(newMetaFieldValue) });
         };
 
         return (
-            <div {...blockProps}>
-                <Text upperCase={true}>Links</Text>
-                <ul>
-                    {metaFieldValue.map((link) => (
-                        <li key={link}>{link}
-                        <Button isDestructive size="small" onClick={() => removeMetaValue(link)}>X</Button>
-                        </li>
-                    ))}
-                </ul>
-                <TextControl value={value} onChange={(newValue) => setValue(newValue)} />
-                <Button size="small" variant="secondary" onClick={addMetaValue}>Add link</Button>
-            </div>
+            <Card {...blockProps}>
+                <CardHeader>
+                    <Heading level={4}>Links</Heading>
+                </CardHeader>
+                <CardBody>
+                    <ul>
+                        {metaFieldValue.map((link) => (
+                            <li key={link.url}>{link.name} - {link.url}
+                                <Button isDestructive size="small" onClick={() => removeMetaValue(link)}>X</Button>
+                            </li>
+                        ))}
+                    </ul>
+                    <TextControl value={valueName} onChange={(newValue) => setValueName(newValue)} label="Title" />
+                    <TextControl value={valueUrl} onChange={(newValue) => setValueUrl(newValue)} label="URL" />
+                    <Button size="small" variant="secondary" onClick={addMetaValue} disabled={!(valueName && valueUrl)}>Add link</Button>
+                </CardBody>
+            </Card>
         );
     },
 

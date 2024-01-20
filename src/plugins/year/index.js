@@ -91,7 +91,7 @@ registerPlugin('mve-timeline', {
                 <PanelRow><VStack>
                     <MediaUploadCheck>
                         <div style={{ display: 'block' }}><Text upperCase={true}>Image</Text></div>
-
+                        { image && <TextControl value={imageSource} onChange={updateImageSource} placeholder="Image source" /> }
                         <MediaUpload
                             onSelect={updateImageId}
                             allowedTypes={['image']}
@@ -109,7 +109,6 @@ registerPlugin('mve-timeline', {
                         />
 
                     </MediaUploadCheck>
-                    { image && <TextControl value={imageSource} onChange={updateImageSource} label="Image source" /> }
                 </VStack></PanelRow>
 
 
