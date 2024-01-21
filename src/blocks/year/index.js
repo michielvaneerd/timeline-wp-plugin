@@ -46,11 +46,25 @@ registerBlockType('mve-timeline/year', {
 
         const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
-        const metaFieldValue = meta['mve_timeline_year'];
+        const valueYear = meta['mve_timeline_year'];
+        const valueYearEnd = meta['mve_timeline_year_end'];
 
         const updateYear = (newValue) => {
-            newValue = parseInt(newValue, 10);
-            setMeta({ ...meta, mve_timeline_year: !isNaN(newValue) ? newValue : 0 });
+            if (newValue === '') {
+                setMeta({ ...meta, mve_timeline_year: '' });
+            } else {
+                newValue = parseInt(newValue, 10);
+                setMeta({ ...meta, mve_timeline_year: !isNaN(newValue) ? newValue : '' });
+            }
+        };
+
+        const updateYearEnd = (newValue) => {
+            if (newValue === '') {
+                setMeta({ ...meta, mve_timeline_year_end: '' });
+            } else {
+                newValue = parseInt(newValue, 10);
+                setMeta({ ...meta, mve_timeline_year_end: !isNaN(newValue) ? newValue : '' });
+            }
         };
 
         return (
@@ -59,7 +73,8 @@ registerBlockType('mve-timeline/year', {
                     <Heading level={4}>Year and timeline</Heading>
                 </CardHeader>
                 <CardBody>
-                    <TextControl onChange={updateYear} value={metaFieldValue} label="Year" />
+                    <TextControl onChange={updateYear} value={valueYear} label="Year start" />
+                    <TextControl onChange={updateYearEnd} value={valueYearEnd} label="Year end" />
                     <SelectControl label="Timeline" options={options} onChange={onChangeTimeline} value={currentTags ? currentTags[0] : ''} />
                 </CardBody>
             </Card>

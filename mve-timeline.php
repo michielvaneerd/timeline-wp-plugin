@@ -73,6 +73,12 @@ add_action('init', function () {
         'type' => 'integer'
     ]);
 
+    register_post_meta('mve_timeline_item', 'mve_timeline_year_end', [
+        'show_in_rest' => true,
+        'single' => true,
+        'type' => 'integer'
+    ]);
+
     register_post_meta('mve_timeline_item', 'mve_timeline_image', [
         'show_in_rest' => true,
         'single' => true,
@@ -181,6 +187,7 @@ function mve_timeline_rest_get_timeline_items(WP_REST_Request $request)
     $query = "select
             {$prefix}posts.ID AS id, {$prefix}posts.post_title AS title,
             {$prefix}postmeta_year.meta_value as 'year',
+            {$prefix}postmeta_year_end.meta_value as 'year_end',
             {$prefix}postmeta_intro.meta_value as 'intro',
             {$prefix}postmeta_links.meta_value as 'links',
             {$prefix}postmeta_image_source.meta_value as 'image_source',
@@ -190,6 +197,7 @@ function mve_timeline_rest_get_timeline_items(WP_REST_Request $request)
         {$prefix}posts
         inner join {$prefix}postmeta as {$prefix}postmeta_year on {$prefix}postmeta_year.post_id = {$prefix}posts.ID and {$prefix}postmeta_year.meta_key = 'mve_timeline_year'
         inner join {$prefix}postmeta as {$prefix}postmeta_intro on {$prefix}postmeta_intro.post_id = {$prefix}posts.ID and {$prefix}postmeta_intro.meta_key = 'mve_timeline_intro'
+        left join {$prefix}postmeta as {$prefix}postmeta_year_end on {$prefix}postmeta_year_end.post_id = {$prefix}posts.ID and {$prefix}postmeta_year_end.meta_key = 'mve_timeline_year_end'
         left join {$prefix}postmeta as {$prefix}postmeta_image on {$prefix}postmeta_image.post_id = {$prefix}posts.ID and {$prefix}postmeta_image.meta_key = 'mve_timeline_image'
         left join {$prefix}postmeta as {$prefix}postmeta_links on {$prefix}postmeta_links.post_id = {$prefix}posts.ID and {$prefix}postmeta_links.meta_key = 'mve_timeline_links'
         left join {$prefix}postmeta as {$prefix}postmeta_image_source on {$prefix}postmeta_image_source.post_id = {$prefix}posts.ID and {$prefix}postmeta_image_source.meta_key = 'mve_timeline_image_source'
