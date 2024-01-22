@@ -76,7 +76,7 @@ add_action('init', function () {
     register_post_meta('mve_timeline_item', 'mve_timeline_year_end', [
         'show_in_rest' => true,
         'single' => true,
-        'type' => 'integer'
+        'type' => 'string' // Cannot be 'int' because this can be null, which is not allowed for 'int' types apparently...
     ]);
 
     register_post_meta('mve_timeline_item', 'mve_timeline_image', [

@@ -46,8 +46,8 @@ registerBlockType('mve-timeline/year', {
 
         const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
-        const valueYear = meta['mve_timeline_year'];
-        const valueYearEnd = meta['mve_timeline_year_end'];
+        const valueYear = meta['mve_timeline_year'] ?? 0;
+        const valueYearEnd = meta['mve_timeline_year_end'] ?? '';
 
         const updateYear = (newValue) => {
             if (newValue === '') {
@@ -60,10 +60,10 @@ registerBlockType('mve-timeline/year', {
 
         const updateYearEnd = (newValue) => {
             if (newValue === '') {
-                setMeta({ ...meta, mve_timeline_year_end: '' });
+                setMeta({ ...meta, mve_timeline_year_end: null });
             } else {
                 newValue = parseInt(newValue, 10);
-                setMeta({ ...meta, mve_timeline_year_end: !isNaN(newValue) ? newValue : '' });
+                setMeta({ ...meta, mve_timeline_year_end: !isNaN(newValue) ? newValue.toString() : null });
             }
         };
 
