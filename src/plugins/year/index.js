@@ -1,9 +1,9 @@
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
-import { PanelRow, TextControl, SelectControl, Button, ResponsiveWrapper, __experimentalText as Text, __experimentalVStack as VStack, ToolbarButton, Popover, Card, CardBody } from '@wordpress/components';
+import { PanelRow, TextControl, SelectControl, Button, ResponsiveWrapper, __experimentalText as Text, __experimentalVStack as VStack, __experimentalHStack as HStack, ToolbarButton, Popover, Card, CardBody } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
-import { MediaUpload, MediaUploadCheck, BlockControls } from '@wordpress/block-editor';
+import { MediaUpload, MediaUploadCheck, BlockControls, RichText } from '@wordpress/block-editor';
 import { registerFormatType, toggleFormat, applyFormat } from '@wordpress/rich-text';
 import { useState } from 'react';
 
@@ -26,25 +26,82 @@ registerPlugin('mve-timeline', {
 
         const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
-        const year = meta['mve_timeline_year'];
-        const imageId = meta['mve_timeline_image'];
-        const imageSource = meta['mve_timeline_image_source'] ?? '';
+        const [linkName, setLinkName] = useState('');
+        const [linkUrl, setLinkUrl] = useState('');
+
+        const valueYear = meta['mve_timeline_year'] ?? '';
+        const valueYearEnd = meta['mve_timeline_year_end'] ?? '';
 
         const updateYear = (newValue) => {
-            newValue = parseInt(newValue, 10);
-            setMeta({ ...meta, mve_timeline_year: !isNaN(newValue) ? newValue : 0 });
+            if (newValue === '') {
+                setMeta({ ...meta, mve_timeline_year: null });
+            } else {
+                newValue = parseInt(newValue, 10);
+                setMeta({ ...meta, mve_timeline_year: !isNaN(newValue) ? newValue.toString() : null });
+            }
         };
 
+        const updateYearEnd = (newValue) => {
+            if (newValue === '') {
+                setMeta({ ...meta, mve_timeline_year_end: null });
+            } else {
+                newValue = parseInt(newValue, 10);
+                setMeta({ ...meta, mve_timeline_year_end: !isNaN(newValue) ? newValue.toString() : null });
+            }
+        };
+
+        const imageId = meta['mve_timeline_image'];
+        const imageSource = meta['mve_timeline_image_source'] ?? '';
+        const imageInfo = meta['mve_timeline_image_info'] ?? '';
+        //const intro = meta['mve_timeline_intro'];
+        let links = meta['mve_timeline_links'];
+        if (!links) {
+            links = [];
+        } else {
+            links = JSON.parse(links); // [{"name": "", "url": ""}]
+        }
+        const addLink = () => {
+            links.push({
+                name: linkName,
+                url: linkUrl
+            });
+            setMeta({ ...meta, mve_timeline_links: JSON.stringify(links) });
+            setLinkName('');
+            setLinkUrl('');
+        };
+        const removeLink = (valueToRemove) => {
+            const newLinks = [];
+            for (const val of links) {
+                if (val.name === valueToRemove.name && val.url === valueToRemove.url) {
+
+                } else {
+                    newLinks.push(val);
+                }
+            }
+            setMeta({ ...meta, mve_timeline_links: JSON.stringify(newLinks) });
+        };
+
+
+        // const updateIntro = (newValue) => {
+        //     setMeta({ ...meta, mve_timeline_intro: newValue });
+        // };
+
         const updateImageId = (newValue) => {
-            const obj = { ...meta, mve_timeline_image: newValue ? newValue.id : null };
+            const obj = { ...meta, mve_timeline_image: newValue ? newValue.id : null, mve_timeline_image_src: newValue ? newValue.url : null };
             if (!newValue) {
                 obj.mve_timeline_image_source = null;
+                obj.mve_timeline_image_info = null;
+                obj.mve_timeline_image_src = null;
             }
             setMeta(obj);
         };
 
         const updateImageSource = (newValue) => {
             setMeta({ ...meta, mve_timeline_image_source: newValue });
+        };
+
+        const updateImageInfo = (newValue) => {
+            setMeta({ ...meta, mve_timeline_image_info: newValue });
         };
 
         const tags = useSelect((select) => {
@@ -75,43 +132,77 @@ registerPlugin('mve-timeline', {
             };
         }) : []);
 
+        const panelStyle = {
+            backgroundColor: '#F3F3F3', padding: '.4rem', width: '100%'
+        };
+
         return (
-            <PluginDocumentSettingPanel title="MVE Timeline" initialOpen={true}>
-
+            <PluginDocumentSettingPanel title="MVE Timeline" initialOpen={true} name="mve_timeline_panel">
                 <PanelRow>
-                    <TextControl
-                        label="MVE Timeline Year"
-                        value={year}
-                        onChange={updateYear}
+                    <div style={panelStyle}>
+                        <HStack>
+                            <TextControl onChange={updateYear} value={valueYear} label="Year start" />
+                            <TextControl onChange={updateYearEnd} value={valueYearEnd} label="Year end" />
+                        </HStack>
+                    </div>
+                </PanelRow>
+                <PanelRow>
+                    <div style={panelStyle}>
+                        <SelectControl label="Timeline" options={options} onChange={onChange} value={currentTags ? currentTags[0] : ''} />
+                    </div>
+                </PanelRow>
+                {/* <PanelRow>
+                    <RichText
+                        placeholder="Intro..."
+                        allowedFormats={['core/bold', 'core/italic', 'mve-timeline/internal-link']}
+                        label="MVE Timeline Intro"
+                        value={intro}
+                        onChange={updateIntro}
                     />
+                </PanelRow> */}
+                <PanelRow>
+                    <div style={panelStyle}>
+                        <VStack>
+                            <MediaUploadCheck>
+                                <Text upperCase={true}>Image</Text>
+                                <MediaUpload
+                                    onSelect={updateImageId}
+                                    allowedTypes={['image']}
+                                    value={imageId}
+                                    render={({ open }) => (<>
+                                        {image && <div style={{ display: 'block' }}><ResponsiveWrapper naturalWidth={image.media_details.width}
+                                            naturalHeight={image.media_details.height}><img src={image.source_url} /></ResponsiveWrapper></div>}
+                                        <div style={{ display: 'block' }}>
+                                            {!image && <Button variant="secondary" onClick={open}>Open Media Library</Button>}
+                                            {image && <Button onClick={() => updateImageId(null)} isLink isDestructive>Remove image</Button>}
+                                        </div>
+
+                                    </>
+                                    )}
+                                />
+                                {image && <TextControl value={imageSource} onChange={updateImageSource} label="Source" />}
+                                {image && <TextControl value={imageInfo} onChange={updateImageInfo} label="Info" />}
+                            </MediaUploadCheck>
+                        </VStack>
+                    </div>
                 </PanelRow>
                 <PanelRow>
-                    <SelectControl label="Timeline" options={options} onChange={onChange} value={currentTags ? currentTags[0] : ''} />
+                <div style={panelStyle}>
+                    <VStack>
+                        <Text upperCase={true}>Links</Text>
+                        <ul>
+                            {links.map((link) => (
+                                <li key={link.url}>{link.name} - {link.url}
+                                    <Button isDestructive size="small" onClick={() => removeLink(link)}>X</Button>
+                                </li>
+                            ))}
+                        </ul>
+                        <TextControl value={linkName} onChange={(newValue) => setLinkName(newValue)} label="Title" />
+                        <TextControl value={linkUrl} onChange={(newValue) => setLinkUrl(newValue)} label="URL" />
+                        <Button size="small" variant="secondary" onClick={addLink} disabled={!(linkName && linkUrl)}>Add link</Button>
+                    </VStack>
+                    </div>
                 </PanelRow>
-                <PanelRow><VStack>
-                    <MediaUploadCheck>
-                        <div style={{ display: 'block' }}><Text upperCase={true}>Image</Text></div>
-                        { image && <TextControl value={imageSource} onChange={updateImageSource} placeholder="Image source" /> }
-                        <MediaUpload
-                            onSelect={updateImageId}
-                            allowedTypes={['image']}
-                            value={imageId}
-                            render={({ open }) => (<>
-                                {image && <div style={{ display: 'block' }}><ResponsiveWrapper naturalWidth={image.media_details.width}
-                                    naturalHeight={image.media_details.height}><img src={image.source_url} /></ResponsiveWrapper></div>}
-                                <div style={{ display: 'block' }}>
-                                    {!image && <Button variant="secondary" onClick={open}>Open Media Library</Button>}
-                                    {image && <Button onClick={() => updateImageId(null)} isLink isDestructive>Remove image</Button>}
-                                </div>
-
-                            </>
-                            )}
-                        />
-
-                    </MediaUploadCheck>
-                </VStack></PanelRow>
-
-
             </PluginDocumentSettingPanel>
         );
     }

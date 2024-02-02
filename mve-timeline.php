@@ -10,11 +10,11 @@ add_action('init', function () {
     // https://artisansweb.net/create-pluginsidebar-in-gutenberg/
     // https://kinsta.com/blog/wordpress-add-meta-box-to-post/#register-custom-meta-fields
 
-    register_block_type(__DIR__ . '/build/blocks/year');
+    //register_block_type(__DIR__ . '/build/blocks/year');
     //register_block_type(__DIR__ . '/build/blocks/instance');
     register_block_type(__DIR__ . '/build/blocks/intro');
-    register_block_type(__DIR__ . '/build/blocks/image');
-    register_block_type(__DIR__ . '/build/blocks/links');
+    //register_block_type(__DIR__ . '/build/blocks/image');
+    //register_block_type(__DIR__ . '/build/blocks/links');
 
     register_post_type('mve_timeline_item', [
         'labels' => [
@@ -30,41 +30,41 @@ add_action('init', function () {
             //'revisions',
             'thumbnail'
         ],
-        'template' => [
-            [
-                'mve-timeline/year', [
-                    'lock' => [
-                        'move'   => true,
-                        'remove' => true
-                    ]
-                ]
-            ],
-            [
-                'mve-timeline/image', [
-                    'lock' => [
-                        'move'   => true,
-                        'remove' => true
-                    ]
-                ]
-            ],
-            [
-                'mve-timeline/intro', [
-                    'lock' => [
-                        'move'   => true,
-                        'remove' => true
-                    ]
-                ]
-            ],
-            [
-                'mve-timeline/links', [
-                    'lock' => [
-                        'move'   => true,
-                        'remove' => true
-                    ]
-                ]
-            ],
-        ],
-        'template_lock' => 'all'
+        // 'template' => [
+        //     [
+        //         'mve-timeline/year', [
+        //             'lock' => [
+        //                 'move'   => true,
+        //                 'remove' => true
+        //             ]
+        //         ]
+        //     ],
+        //     [
+        //         'mve-timeline/image', [
+        //             'lock' => [
+        //                 'move'   => true,
+        //                 'remove' => true
+        //             ]
+        //         ]
+        //     ],
+        //     [
+        //         'mve-timeline/intro', [
+        //             'lock' => [
+        //                 'move'   => true,
+        //                 'remove' => true
+        //             ]
+        //         ]
+        //     ],
+        //     [
+        //         'mve-timeline/links', [
+        //             'lock' => [
+        //                 'move'   => true,
+        //                 'remove' => true
+        //             ]
+        //         ]
+        //     ],
+        // ],
+        // 'template_lock' => 'all'
     ]);
 
     register_post_meta('mve_timeline_item', 'mve_timeline_year', [
@@ -136,15 +136,15 @@ add_action('init', function () {
 });
 
 // For plugins:
-// add_action('enqueue_block_editor_assets', function () {
-//     $asset_file = include(plugin_dir_path(__FILE__) . 'build/plugins/year/index.asset.php');
-//     wp_enqueue_script(
-//         'mve-timeline-year2',
-//         plugins_url('build/plugins/year/index.js', __FILE__),
-//         $asset_file['dependencies'],
-//         $asset_file['version']
-//     );
-// });
+add_action('enqueue_block_editor_assets', function () {
+    $asset_file = include(plugin_dir_path(__FILE__) . 'build/plugins/year/index.asset.php');
+    wp_enqueue_script(
+        'mve-timeline-year2',
+        plugins_url('build/plugins/year/index.js', __FILE__),
+        $asset_file['dependencies'],
+        $asset_file['version']
+    );
+});
 
 add_filter('single_template', function ($template) {
     global $post;
@@ -155,31 +155,42 @@ add_filter('single_template', function ($template) {
 });
 
 add_action('rest_api_init', function () {
-    // register_rest_route('mve-timeline/v1', '/timelines', [
-    //     'methods' => 'GET',
-    //     'callback' => 'mve_timeline_rest_get_timelines'
-    // ]);
-    register_rest_route('mve-timeline/v1', '/items/draft', [
-        'methods' => 'GET',
-        'callback' => 'mve_timeline_rest_get_timeline_items_draft',
-        'permission_callback' => function () {
-            return current_user_can('edit_others_posts');
-        }
+
+    // We need to add the un-rendered title, because otherwise some characters will be rewritten to HTML entities.
+    register_rest_field('mve_timeline_item', 'title_raw', [
+        'get_callback' => function($arr) {
+            return $arr['title']['raw'];
+        },
+        'schema' => [
+            'type' => 'string'
+        ]
     ]);
-    register_rest_route('mve-timeline/v1', '/timelines/(?P<id>[\d\,]+)', [
-        'methods' => 'GET',
-        'callback' => 'mve_timeline_rest_get_timeline_items_for_category',
-        'args' => [
-            'id' => [
-                'validate_callback' => function ($param) {
-                    return preg_match("/^[\d\,]+$/", $param);
-                }
-            ]
-        ],
-        'permission_callback' => function () {
-            return true;
-        }
-    ]);
+
+//     // register_rest_route('mve-timeline/v1', '/timelines', [
+//     //     'methods' => 'GET',
+//     //     'callback' => 'mve_timeline_rest_get_timelines'
+//     // ]);
+//     register_rest_route('mve-timeline/v1', '/items/draft', [
+//         'methods' => 'GET',
+//         'callback' => 'mve_timeline_rest_get_timeline_items_draft',
+//         'permission_callback' => function () {
+//             return current_user_can('edit_others_posts');
+//         }
+//     ]);
+//     register_rest_route('mve-timeline/v1', '/timelines/(?P<id>[\d\,]+)', [
+//         'methods' => 'GET',
+//         'callback' => 'mve_timeline_rest_get_timeline_items_for_category',
+//         'args' => [
+//             'id' => [
+//                 'validate_callback' => function ($param) {
+//                     return preg_match("/^[\d\,]+$/", $param);
+//                 }
+//             ]
+//         ],
+//         'permission_callback' => function () {
+//             return true;
+//         }
+//     ]);
 });
 
 // function mve_timeline_rest_get_timelines_new()
@@ -228,88 +239,88 @@ add_action('rest_api_init', function () {
 // Dan kan ik alles in de meta opslaan en hoef ik niet de featured media op te halen.
 // Nadeel van featured media is dat deze standaard deel uitmaakt van de content...
 // https://wpsites.net/genesis-tutorials/add-featured-image-before-content-in-any-theme/????
-function _mve_timeline_rest_get_timeline_items(WP_REST_Request $request, ?array $timelineIds, ?bool $draft)
-{
-    global $wpdb;
+// function _mve_timeline_rest_get_timeline_items(WP_REST_Request $request, ?array $timelineIds, ?bool $draft)
+// {
+//     global $wpdb;
 
-    $dir = wp_get_upload_dir();
+//     $dir = wp_get_upload_dir();
 
-    $prefix = $wpdb->prefix;
+//     $prefix = $wpdb->prefix;
 
-    $wheres = [
-        "{$prefix}posts.post_status = '%s'"
-    ];
-    $whereArgs = [
-        $draft ? 'draft' : 'publish'
-    ];
+//     $wheres = [
+//         "{$prefix}posts.post_status = '%s'"
+//     ];
+//     $whereArgs = [
+//         $draft ? 'draft' : 'publish'
+//     ];
 
-    if (!empty($timelineIds)) {
-        $ids = implode(',', array_map(function($id) {
-            return (int)$id;
-        }, $timelineIds));
-        $wheres[] = "{$prefix}term_relationships.term_taxonomy_id in ($ids)";
-    }
+//     if (!empty($timelineIds)) {
+//         $ids = implode(',', array_map(function($id) {
+//             return (int)$id;
+//         }, $timelineIds));
+//         $wheres[] = "{$prefix}term_relationships.term_taxonomy_id in ($ids)";
+//     }
 
-    $whereAsString = implode(' AND ', $wheres);
+//     $whereAsString = implode(' AND ', $wheres);
 
-    $orderBy = 'year';
-    $order = 'desc';
-    if (!empty($request['order_by'])) {
-        switch ($request['order_by']) {
-            case 'modified':
-                $orderBy = 'post_modified';
-                break;
-        }
-    }
+//     $orderBy = 'year';
+//     $order = 'desc';
+//     if (!empty($request['order_by'])) {
+//         switch ($request['order_by']) {
+//             case 'modified':
+//                 $orderBy = 'post_modified';
+//                 break;
+//         }
+//     }
 
-    $query = "select
-            {$prefix}posts.ID AS post_id,
-            {$prefix}posts.post_title AS title,
-            {$prefix}postmeta_year.meta_value as 'year',
-            {$prefix}postmeta_year_end.meta_value as 'year_end',
-            {$prefix}postmeta_intro.meta_value as 'intro',
-            {$prefix}postmeta_links.meta_value as 'links',
-            {$prefix}postmeta_image_source.meta_value as 'image_source',
-            {$prefix}postmeta_image_info.meta_value as 'image_info',
-            concat('" . $dir['baseurl'] . "/', {$prefix}postmeta_image_url.meta_value) as 'image',
-            {$prefix}term_relationships.term_taxonomy_id
-        from
-        {$prefix}posts
-        inner join {$prefix}postmeta as {$prefix}postmeta_year on {$prefix}postmeta_year.post_id = {$prefix}posts.ID and {$prefix}postmeta_year.meta_key = 'mve_timeline_year'
-        inner join {$prefix}postmeta as {$prefix}postmeta_intro on {$prefix}postmeta_intro.post_id = {$prefix}posts.ID and {$prefix}postmeta_intro.meta_key = 'mve_timeline_intro'
-        left join {$prefix}postmeta as {$prefix}postmeta_year_end on {$prefix}postmeta_year_end.post_id = {$prefix}posts.ID and {$prefix}postmeta_year_end.meta_key = 'mve_timeline_year_end'
-        left join {$prefix}postmeta as {$prefix}postmeta_image on {$prefix}postmeta_image.post_id = {$prefix}posts.ID and {$prefix}postmeta_image.meta_key = 'mve_timeline_image'
-        left join {$prefix}postmeta as {$prefix}postmeta_links on {$prefix}postmeta_links.post_id = {$prefix}posts.ID and {$prefix}postmeta_links.meta_key = 'mve_timeline_links'
-        left join {$prefix}postmeta as {$prefix}postmeta_image_source on {$prefix}postmeta_image_source.post_id = {$prefix}posts.ID and {$prefix}postmeta_image_source.meta_key = 'mve_timeline_image_source'
-        left join {$prefix}postmeta as {$prefix}postmeta_image_info on {$prefix}postmeta_image_info.post_id = {$prefix}posts.ID and {$prefix}postmeta_image_info.meta_key = 'mve_timeline_image_info'
-        left join {$prefix}postmeta as {$prefix}postmeta_image_url on {$prefix}postmeta_image_url.post_id = {$prefix}postmeta_image.meta_value and {$prefix}postmeta_image_url.meta_key = '_wp_attached_file'
-        inner join {$prefix}term_relationships on {$prefix}term_relationships.object_id = {$prefix}posts.ID
-        where
-        $whereAsString
-        and {$prefix}posts.post_type = 'mve_timeline_item'
-        order by $orderBy $order";
+//     $query = "select
+//             {$prefix}posts.ID AS post_id,
+//             {$prefix}posts.post_title AS title,
+//             {$prefix}postmeta_year.meta_value as 'year',
+//             {$prefix}postmeta_year_end.meta_value as 'year_end',
+//             {$prefix}postmeta_intro.meta_value as 'intro',
+//             {$prefix}postmeta_links.meta_value as 'links',
+//             {$prefix}postmeta_image_source.meta_value as 'image_source',
+//             {$prefix}postmeta_image_info.meta_value as 'image_info',
+//             concat('" . $dir['baseurl'] . "/', {$prefix}postmeta_image_url.meta_value) as 'image',
+//             {$prefix}term_relationships.term_taxonomy_id
+//         from
+//         {$prefix}posts
+//         inner join {$prefix}postmeta as {$prefix}postmeta_year on {$prefix}postmeta_year.post_id = {$prefix}posts.ID and {$prefix}postmeta_year.meta_key = 'mve_timeline_year'
+//         inner join {$prefix}postmeta as {$prefix}postmeta_intro on {$prefix}postmeta_intro.post_id = {$prefix}posts.ID and {$prefix}postmeta_intro.meta_key = 'mve_timeline_intro'
+//         left join {$prefix}postmeta as {$prefix}postmeta_year_end on {$prefix}postmeta_year_end.post_id = {$prefix}posts.ID and {$prefix}postmeta_year_end.meta_key = 'mve_timeline_year_end'
+//         left join {$prefix}postmeta as {$prefix}postmeta_image on {$prefix}postmeta_image.post_id = {$prefix}posts.ID and {$prefix}postmeta_image.meta_key = 'mve_timeline_image'
+//         left join {$prefix}postmeta as {$prefix}postmeta_links on {$prefix}postmeta_links.post_id = {$prefix}posts.ID and {$prefix}postmeta_links.meta_key = 'mve_timeline_links'
+//         left join {$prefix}postmeta as {$prefix}postmeta_image_source on {$prefix}postmeta_image_source.post_id = {$prefix}posts.ID and {$prefix}postmeta_image_source.meta_key = 'mve_timeline_image_source'
+//         left join {$prefix}postmeta as {$prefix}postmeta_image_info on {$prefix}postmeta_image_info.post_id = {$prefix}posts.ID and {$prefix}postmeta_image_info.meta_key = 'mve_timeline_image_info'
+//         left join {$prefix}postmeta as {$prefix}postmeta_image_url on {$prefix}postmeta_image_url.post_id = {$prefix}postmeta_image.meta_value and {$prefix}postmeta_image_url.meta_key = '_wp_attached_file'
+//         inner join {$prefix}term_relationships on {$prefix}term_relationships.object_id = {$prefix}posts.ID
+//         where
+//         $whereAsString
+//         and {$prefix}posts.post_type = 'mve_timeline_item'
+//         order by $orderBy $order";
 
 
-    $results = $wpdb->get_results($wpdb->prepare($query, ...array_values($whereArgs)));
+//     $results = $wpdb->get_results($wpdb->prepare($query, ...array_values($whereArgs)));
 
-    // Note that all values are strings! So make sure to cast them on the client if needed.
-    // We return the post ID, this can be requested by http://localhost:8000/?p=ID
-    return new WP_REST_Response(['items' => $results]);
-}
+//     // Note that all values are strings! So make sure to cast them on the client if needed.
+//     // We return the post ID, this can be requested by http://localhost:8000/?p=ID
+//     return new WP_REST_Response(['items' => $results]);
+// }
 
-function mve_timeline_rest_get_timeline_items_draft(WP_REST_Request $request)
-{
-    return _mve_timeline_rest_get_timeline_items($request, null, true);
-}
+// function mve_timeline_rest_get_timeline_items_draft(WP_REST_Request $request)
+// {
+//     return _mve_timeline_rest_get_timeline_items($request, null, true);
+// }
 
-function mve_timeline_rest_get_timeline_items_for_category(WP_REST_Request $request)
-{
-    // $ids = array_map(function($id) {
-    //     return (int)$id;
-    // }, explode(',', $request['id']));
-    $ids = explode(',', $request['id']);
-    return _mve_timeline_rest_get_timeline_items($request, $ids, false);
-}
+// function mve_timeline_rest_get_timeline_items_for_category(WP_REST_Request $request)
+// {
+//     // $ids = array_map(function($id) {
+//     //     return (int)$id;
+//     // }, explode(',', $request['id']));
+//     $ids = explode(',', $request['id']);
+//     return _mve_timeline_rest_get_timeline_items($request, $ids, false);
+// }
 
 add_filter('manage_mve_timeline_item_posts_columns', function ($columns) {
     return array_merge($columns, ['mve_timeline_year' => 'Year']);
@@ -360,3 +371,10 @@ add_action('enqueue_block_assets', function () {
 //     }
 //     return $allowed_block_types;
 // }, 10, 2);
+
+// This can be used to prevent deletion of images that are used for timeline items.
+// When return false it will prevent deletion.
+add_action('pre_delete_attachment', function($delete, $post, $force_delete) {
+    // Is this image used in a post meta image?
+    //return false; // Return false will forbid the deletion.
+}, 10, 3);
