@@ -32,7 +32,7 @@ registerBlockType('mve-timeline/intro', {
                     label="MVE Timeline Intro"
                     value={metaFieldValue}
                     onChange={updateMetaValue}
-                    style={{backgroundColor: '#F0F0F0', padding: '1rem', border: '1px solid #C0C0C0'}}
+                    style={{backgroundColor: 'white', padding: '1rem', border: '1px solid #C0C0C0'}}
                 />
                 </CardBody>
             </Card>

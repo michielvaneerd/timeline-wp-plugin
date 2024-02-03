@@ -10,11 +10,11 @@ add_action('init', function () {
     // https://artisansweb.net/create-pluginsidebar-in-gutenberg/
     // https://kinsta.com/blog/wordpress-add-meta-box-to-post/#register-custom-meta-fields
 
-    //register_block_type(__DIR__ . '/build/blocks/year');
-    //register_block_type(__DIR__ . '/build/blocks/instance');
+    register_block_type(__DIR__ . '/build/blocks/year');
+    register_block_type(__DIR__ . '/build/blocks/instance');
     register_block_type(__DIR__ . '/build/blocks/intro');
-    //register_block_type(__DIR__ . '/build/blocks/image');
-    //register_block_type(__DIR__ . '/build/blocks/links');
+    register_block_type(__DIR__ . '/build/blocks/image');
+    register_block_type(__DIR__ . '/build/blocks/links');
 
     register_post_type('mve_timeline_item', [
         'labels' => [
@@ -30,6 +30,8 @@ add_action('init', function () {
             //'revisions',
             'thumbnail'
         ],
+        // These meta data are always available in the PluginDocumentSettingPanel, so we don't need them in here.
+        // But if the user wants, he can add them. So it's up to the user.
         // 'template' => [
         //     [
         //         'mve-timeline/year', [
@@ -63,8 +65,9 @@ add_action('init', function () {
         //             ]
         //         ]
         //     ],
+
         // ],
-        // 'template_lock' => 'all'
+        //'template_lock' => 'all'
     ]);
 
     register_post_meta('mve_timeline_item', 'mve_timeline_year', [
@@ -78,6 +81,12 @@ add_action('init', function () {
         'show_in_rest' => true,
         'single' => true,
         'type' => 'string' // Cannot be 'int' because this can be null, which is not allowed for 'int' types apparently...
+    ]);
+
+    register_post_meta('mve_timeline_item', 'mve_timeline_content', [
+        'show_in_rest' => true,
+        'single' => true,
+        'type' => 'boolean'
     ]);
 
     register_post_meta('mve_timeline_item', 'mve_timeline_image', [
@@ -135,6 +144,14 @@ add_action('init', function () {
 
 });
 
+// Make sure no one can unlock the blocks for mve timeline.
+// add_filter('block_editor_settings_all', function ($settings, $context) {
+//     if ($context->post && 'mve_timeline_item' === $context->post->post_type) {
+//         $settings['canLockBlocks'] = false;
+//     }
+//     return $settings;
+// }, 10, 2);
+
 // For plugins:
 add_action('enqueue_block_editor_assets', function () {
     $asset_file = include(plugin_dir_path(__FILE__) . 'build/plugins/year/index.asset.php');
@@ -146,6 +163,7 @@ add_action('enqueue_block_editor_assets', function () {
     );
 });
 
+// Use this template if we want to view a timeline item post type.
 add_filter('single_template', function ($template) {
     global $post;
     if ($post->post_type === 'mve_timeline_item') {
@@ -158,7 +176,7 @@ add_action('rest_api_init', function () {
 
     // We need to add the un-rendered title, because otherwise some characters will be rewritten to HTML entities.
     register_rest_field('mve_timeline_item', 'title_raw', [
-        'get_callback' => function($arr) {
+        'get_callback' => function ($arr) {
             return $arr['title']['raw'];
         },
         'schema' => [
@@ -166,31 +184,31 @@ add_action('rest_api_init', function () {
         ]
     ]);
 
-//     // register_rest_route('mve-timeline/v1', '/timelines', [
-//     //     'methods' => 'GET',
-//     //     'callback' => 'mve_timeline_rest_get_timelines'
-//     // ]);
-//     register_rest_route('mve-timeline/v1', '/items/draft', [
-//         'methods' => 'GET',
-//         'callback' => 'mve_timeline_rest_get_timeline_items_draft',
-//         'permission_callback' => function () {
-//             return current_user_can('edit_others_posts');
-//         }
-//     ]);
-//     register_rest_route('mve-timeline/v1', '/timelines/(?P<id>[\d\,]+)', [
-//         'methods' => 'GET',
-//         'callback' => 'mve_timeline_rest_get_timeline_items_for_category',
-//         'args' => [
-//             'id' => [
-//                 'validate_callback' => function ($param) {
-//                     return preg_match("/^[\d\,]+$/", $param);
-//                 }
-//             ]
-//         ],
-//         'permission_callback' => function () {
-//             return true;
-//         }
-//     ]);
+    //     // register_rest_route('mve-timeline/v1', '/timelines', [
+    //     //     'methods' => 'GET',
+    //     //     'callback' => 'mve_timeline_rest_get_timelines'
+    //     // ]);
+    //     register_rest_route('mve-timeline/v1', '/items/draft', [
+    //         'methods' => 'GET',
+    //         'callback' => 'mve_timeline_rest_get_timeline_items_draft',
+    //         'permission_callback' => function () {
+    //             return current_user_can('edit_others_posts');
+    //         }
+    //     ]);
+    //     register_rest_route('mve-timeline/v1', '/timelines/(?P<id>[\d\,]+)', [
+    //         'methods' => 'GET',
+    //         'callback' => 'mve_timeline_rest_get_timeline_items_for_category',
+    //         'args' => [
+    //             'id' => [
+    //                 'validate_callback' => function ($param) {
+    //                     return preg_match("/^[\d\,]+$/", $param);
+    //                 }
+    //             ]
+    //         ],
+    //         'permission_callback' => function () {
+    //             return true;
+    //         }
+    //     ]);
 });
 
 // function mve_timeline_rest_get_timelines_new()
@@ -374,7 +392,7 @@ add_action('enqueue_block_assets', function () {
 
 // This can be used to prevent deletion of images that are used for timeline items.
 // When return false it will prevent deletion.
-add_action('pre_delete_attachment', function($delete, $post, $force_delete) {
+add_action('pre_delete_attachment', function ($delete, $post, $force_delete) {
     // Is this image used in a post meta image?
     //return false; // Return false will forbid the deletion.
 }, 10, 3);

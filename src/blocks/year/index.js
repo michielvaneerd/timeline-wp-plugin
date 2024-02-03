@@ -1,6 +1,6 @@
 import { registerBlockType } from '@wordpress/blocks';
-import { __experimentalText as Text, TextControl, Card, CardBody, CardHeader, __experimentalHeading as Heading, SelectControl } from '@wordpress/components';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { __experimentalText as Text, TextControl, Card, CardBody, CardHeader, __experimentalHeading as Heading, SelectControl, __experimentalHStack as HStack } from '@wordpress/components';
+import { useSelect, useDispatch, dispatch, subscribe, select } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useBlockProps } from '@wordpress/block-editor';
 
@@ -11,6 +11,7 @@ registerBlockType('mve-timeline/year', {
             (select) => select('core/editor').getCurrentPostType(),
             []
         );
+
         const postId = useSelect(
             (select) => select('core/editor').getCurrentPostId(),
             []
@@ -73,8 +74,10 @@ registerBlockType('mve-timeline/year', {
                     <Heading level={4}>Year and timeline</Heading>
                 </CardHeader>
                 <CardBody>
-                    <TextControl onChange={updateYear} value={valueYear} label="Year start" />
-                    <TextControl onChange={updateYearEnd} value={valueYearEnd} label="Year end" />
+                    <HStack>
+                        <TextControl onChange={updateYear} value={valueYear} label="Year start" />
+                        <TextControl onChange={updateYearEnd} value={valueYearEnd} label="Year end" />
+                    </HStack>
                     <SelectControl label="Timeline" options={options} onChange={onChangeTimeline} value={currentTags ? currentTags[0] : ''} />
                 </CardBody>
             </Card>

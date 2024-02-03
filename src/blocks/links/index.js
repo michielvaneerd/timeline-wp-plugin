@@ -33,7 +33,7 @@ registerBlockType('mve-timeline/links', {
             setValueName('');
             setValueUrl('');
         };
-        const removeMetaValue = (valueToRemove) => {
+        const removeLink = (valueToRemove) => {
             const newMetaFieldValue = [];
             for (const val of metaFieldValue) {
                 if (val.name === valueToRemove.name && val.url === valueToRemove.url) {
@@ -51,13 +51,12 @@ registerBlockType('mve-timeline/links', {
                     <Heading level={4}>Links</Heading>
                 </CardHeader>
                 <CardBody>
-                    <ul>
+                    <ul style={{ overflowX: 'auto', listStyleType: 'none', padding: 0, margin: 0, marginBottom: '1rem' }}>
                         {metaFieldValue.map((link) => (
-                            <li key={link.url}>{link.name} - {link.url}
-                                <Button isDestructive size="small" onClick={() => removeMetaValue(link)}>X</Button>
-                            </li>
+                            <li key={link.url} style={{ whiteSpace: 'nowrap' }}><Button isDestructive size="small" onClick={() => removeLink(link)}>X</Button> {link.name} - {link.url}</li>
                         ))}
                     </ul>
+
                     <TextControl value={valueName} onChange={(newValue) => setValueName(newValue)} label="Title" />
                     <TextControl value={valueUrl} onChange={(newValue) => setValueUrl(newValue)} label="URL" />
                     <Button size="small" variant="secondary" onClick={addMetaValue} disabled={!(valueName && valueUrl)}>Add link</Button>

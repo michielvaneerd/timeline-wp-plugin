@@ -1,13 +1,36 @@
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
-import { PanelRow, TextControl, SelectControl, Button, ResponsiveWrapper, __experimentalText as Text, __experimentalVStack as VStack, __experimentalHStack as HStack, ToolbarButton, Popover, Card, CardBody } from '@wordpress/components';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { PanelRow, TextControl, SelectControl, Button, ResponsiveWrapper, __experimentalText as Text, __experimentalVStack as VStack, __experimentalHStack as HStack, ToolbarButton, Popover, Card, CardBody, CheckboxControl } from '@wordpress/components';
+import { useSelect, useDispatch, subscribe, select, dispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { MediaUpload, MediaUploadCheck, BlockControls, RichText } from '@wordpress/block-editor';
 import { registerFormatType, toggleFormat, applyFormat } from '@wordpress/rich-text';
 import { useState } from 'react';
 
 
+wp.domReady(() => {
+    let locked = false;
+    subscribe(() => {
+        const requiredMeta = select('core/editor').getEditedPostAttribute('meta');
+        // const cat = select('core/editor').getEditedPostAttribute('mve_timeline');
+        // console.log(cat);
+        if (requiredMeta) {
+            if (!requiredMeta.mve_timeline_year) {
+                if (!locked) {
+                    console.log('Lock');
+                    locked = true;
+                    dispatch('core/editor').lockPostSaving('requiredValueLock');
+                }
+            } else {
+                if (locked) {
+                    console.log('Unlock');
+                    locked = false;
+                    dispatch('core/editor').unlockPostSaving('requiredValueLock');
+                }
+            }
+        }
+    });
+});
 
 registerPlugin('mve-timeline', {
     render: function () {
@@ -53,7 +76,8 @@ registerPlugin('mve-timeline', {
         const imageId = meta['mve_timeline_image'];
         const imageSource = meta['mve_timeline_image_source'] ?? '';
         const imageInfo = meta['mve_timeline_image_info'] ?? '';
-        //const intro = meta['mve_timeline_intro'];
+        const intro = meta['mve_timeline_intro'];
+        const hasContent = meta['mve_timeline_content'] ?? false;
         let links = meta['mve_timeline_links'];
         if (!links) {
             links = [];
@@ -82,9 +106,9 @@ registerPlugin('mve-timeline', {
         };
 
 
-        // const updateIntro = (newValue) => {
-        //     setMeta({ ...meta, mve_timeline_intro: newValue });
-        // };
+        const updateIntro = (newValue) => {
+            setMeta({ ...meta, mve_timeline_intro: newValue });
+        };
 
         const updateImageId = (newValue) => {
             const obj = { ...meta, mve_timeline_image: newValue ? newValue.id : null, mve_timeline_image_src: newValue ? newValue.url : null };
@@ -102,6 +126,10 @@ registerPlugin('mve-timeline', {
 
         const updateImageInfo = (newValue) => {
             setMeta({ ...meta, mve_timeline_image_info: newValue });
+        };
+
+        const updateHasContent = (newValue) => {
+            setMeta({ ...meta, mve_timeline_content: newValue });
         };
 
         const tags = useSelect((select) => {
@@ -122,15 +150,12 @@ registerPlugin('mve-timeline', {
 
         const image = useSelect((select) => select('core').getMedia(imageId), [imageId]);
 
-        const options = [{
-            value: 0,
-            label: 'Choose timeline...'
-        }].concat(tags ? tags.map((tag) => {
+        const options = tags ? tags.map((tag) => {
             return {
                 value: tag.id,
                 label: tag.name
             };
-        }) : []);
+        }) : [];
 
         const panelStyle = {
             backgroundColor: '#F3F3F3', padding: '.4rem', width: '100%'
@@ -141,7 +166,7 @@ registerPlugin('mve-timeline', {
                 <PanelRow>
                     <div style={panelStyle}>
                         <HStack>
-                            <TextControl onChange={updateYear} value={valueYear} label="Year start" />
+                            <TextControl style={{ borderColor: !valueYear ? 'red' : '' }} onChange={updateYear} value={valueYear} label="Year start" />
                             <TextControl onChange={updateYearEnd} value={valueYearEnd} label="Year end" />
                         </HStack>
                     </div>
@@ -151,15 +176,15 @@ registerPlugin('mve-timeline', {
                         <SelectControl label="Timeline" options={options} onChange={onChange} value={currentTags ? currentTags[0] : ''} />
                     </div>
                 </PanelRow>
-                {/* <PanelRow>
-                    <RichText
-                        placeholder="Intro..."
-                        allowedFormats={['core/bold', 'core/italic', 'mve-timeline/internal-link']}
-                        label="MVE Timeline Intro"
-                        value={intro}
-                        onChange={updateIntro}
-                    />
-                </PanelRow> */}
+                <PanelRow>
+                    <div style={panelStyle}>
+                        <CheckboxControl
+                            label="Has content"
+                            checked={hasContent}
+                            onChange={updateHasContent}
+                        />
+                    </div>
+                </PanelRow>
                 <PanelRow>
                     <div style={panelStyle}>
                         <VStack>
@@ -187,20 +212,30 @@ registerPlugin('mve-timeline', {
                     </div>
                 </PanelRow>
                 <PanelRow>
-                <div style={panelStyle}>
-                    <VStack>
-                        <Text upperCase={true}>Links</Text>
-                        <ul>
-                            {links.map((link) => (
-                                <li key={link.url}>{link.name} - {link.url}
-                                    <Button isDestructive size="small" onClick={() => removeLink(link)}>X</Button>
-                                </li>
-                            ))}
-                        </ul>
-                        <TextControl value={linkName} onChange={(newValue) => setLinkName(newValue)} label="Title" />
-                        <TextControl value={linkUrl} onChange={(newValue) => setLinkUrl(newValue)} label="URL" />
-                        <Button size="small" variant="secondary" onClick={addLink} disabled={!(linkName && linkUrl)}>Add link</Button>
-                    </VStack>
+                <div style={panelStyle}><VStack>
+                <Text upperCase={true}>Intro</Text>
+                    <RichText style={{backgroundColor: 'white'}}
+                        placeholder="Intro..."
+                        allowedFormats={['core/bold', 'core/italic', 'mve-timeline/internal-link']}
+                        label="MVE Timeline Intro"
+                        value={intro}
+                        onChange={updateIntro}
+                    />
+                    </VStack></div>
+                </PanelRow>
+                <PanelRow>
+                    <div style={panelStyle}>
+                        <VStack>
+                            <Text upperCase={true}>Links</Text>
+                            <ul style={{ overflowX: 'auto', listStyleType: 'none', padding: 0, margin: 0 }}>
+                                {links.map((link) => (
+                                    <li key={link.url} style={{whiteSpace: 'nowrap'}}><Button isDestructive size="small" onClick={() => removeLink(link)}>X</Button> {link.name} - {link.url}</li>
+                                ))}
+                            </ul>
+                            <TextControl value={linkName} onChange={(newValue) => setLinkName(newValue)} label="Title" />
+                            <TextControl value={linkUrl} onChange={(newValue) => setLinkUrl(newValue)} label="URL" />
+                            <Button size="small" variant="secondary" onClick={addLink} disabled={!(linkName && linkUrl)}>Add link</Button>
+                        </VStack>
                     </div>
                 </PanelRow>
             </PluginDocumentSettingPanel>

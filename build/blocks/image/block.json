@@ -4,5 +4,8 @@
   "name": "mve-timeline/image",
   "category": "widgets",
   "icon": "smiley",
-  "editorScript": "file:./index.js"
+  "editorScript": "file:./index.js",
+  "supports": {
+    "multiple": false
+  }
 }
