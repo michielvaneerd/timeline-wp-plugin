@@ -1,14 +1,15 @@
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
-import { PanelRow, TextControl, SelectControl, Button, __experimentalText as Text, __experimentalVStack as VStack, __experimentalHStack as HStack, ToolbarButton, Popover, Card, CardBody, CheckboxControl } from '@wordpress/components';
+import { PanelRow, SelectControl, __experimentalText as Text, __experimentalVStack as VStack, ToolbarButton, Popover, Card, CardBody, CheckboxControl } from '@wordpress/components';
 import { useSelect, useDispatch, subscribe, select, dispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
-import { BlockControls, RichText } from '@wordpress/block-editor';
+import { BlockControls } from '@wordpress/block-editor';
 import { registerFormatType, toggleFormat, applyFormat } from '@wordpress/rich-text';
 import { useState } from 'react';
 import { init as initImage, Widget as ImageWidget } from '../../shared/image.js';
 import { init as initLinks, Widget as LinksWidget } from '../../shared/links.js';
 import { init as initIntro, Widget as IntroWidget } from '../../shared/intro.js';
+import { init as initYearAndTimeline, Widget as YearAndTimelineWidget } from '../../shared/year_and_timeline.js';
 
 wp.domReady(() => {
     let locked = false;
@@ -16,7 +17,7 @@ wp.domReady(() => {
         const requiredMeta = select('core/editor').getEditedPostAttribute('meta');
         const tag = select('core/editor').getEditedPostAttribute('mve_timeline');
         if (requiredMeta && tag) {
-            if (!requiredMeta.mve_timeline_year || tag.length === 0) {
+            if (!requiredMeta.mve_timeline_year || tag.length === 0 || tag[0] === 0) {
                 if (!locked) {
                     locked = true;
                     dispatch('core/editor').lockPostSaving('requiredValueLock');
@@ -51,27 +52,7 @@ registerPlugin('mve-timeline', {
         initImage(meta, setMeta);
         initLinks(meta, setMeta);
         initIntro(meta, setMeta);
-
-        const valueYear = meta['mve_timeline_year'] ?? '';
-        const valueYearEnd = meta['mve_timeline_year_end'] ?? '';
-
-        const updateYear = (newValue) => {
-            if (newValue === '') {
-                setMeta({ ...meta, mve_timeline_year: null });
-            } else {
-                newValue = parseInt(newValue, 10);
-                setMeta({ ...meta, mve_timeline_year: !isNaN(newValue) ? newValue.toString() : null });
-            }
-        };
-
-        const updateYearEnd = (newValue) => {
-            if (newValue === '') {
-                setMeta({ ...meta, mve_timeline_year_end: null });
-            } else {
-                newValue = parseInt(newValue, 10);
-                setMeta({ ...meta, mve_timeline_year_end: !isNaN(newValue) ? newValue.toString() : null });
-            }
-        };
+        initYearAndTimeline(meta, setMeta, postId);
 
         const hasContent = meta['mve_timeline_content'] ?? false;
 
@@ -79,54 +60,17 @@ registerPlugin('mve-timeline', {
             setMeta({ ...meta, mve_timeline_content: newValue });
         };
 
-        const tags = useSelect((select) => {
-            return select('core').getEntityRecords('taxonomy', 'mve_timeline', { orderBy: 'name', 'order': 'asc', 'per_page': -1 }); // name and slug
-        });
-
-        const currentTags = useSelect(
-            (select) => select('core/editor').getEditedPostAttribute('mve_timeline'),
-            []
-        );
-
-        function updateTimeline(value) {
-            value = parseInt(value, 10);
-            editEntityRecord('postType', 'mve_timeline_item', postId, {
-                'mve_timeline': !isNaN(value) ? [parseInt(value, 10)] : []
-            });
-        }
-
-        const options = [{
-            value: null,
-            label: 'Timeline...'
-        }, ...(tags ? tags.map((tag) => {
-            return {
-                value: tag.id,
-                label: tag.name
-            };
-        }) : [])];
-
         const panelStyle = {
             backgroundColor: '#F3F3F3', padding: '.4rem', width: '100%'
-        };
-
-        const requiredMissingStyle = {
-            backgroundColor: 'red',
-            color: 'white'
         };
 
         return (
             <PluginDocumentSettingPanel title="MVE Timeline" initialOpen={true} name="mve_timeline_panel">
                 <PanelRow>
                     <div style={panelStyle}>
-                        <HStack>
-                            <TextControl style={!valueYear ? requiredMissingStyle : null} onChange={updateYear} value={valueYear} label="Year start" />
-                            <TextControl onChange={updateYearEnd} value={valueYearEnd} label="Year end" />
-                        </HStack>
-                    </div>
-                </PanelRow>
-                <PanelRow>
-                    <div style={panelStyle}>
-                        <SelectControl style={(!currentTags || currentTags.length === 0) ? requiredMissingStyle : null} label="Timeline" options={options} onChange={updateTimeline} value={currentTags ? currentTags[0] : ''} />
+                        <VStack>
+                            <YearAndTimelineWidget />
+                        </VStack>
                     </div>
                 </PanelRow>
                 <PanelRow>

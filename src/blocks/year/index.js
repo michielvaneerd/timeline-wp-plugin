@@ -1,8 +1,9 @@
 import { registerBlockType } from '@wordpress/blocks';
-import { __experimentalText as Text, TextControl, Card, CardBody, CardHeader, __experimentalHeading as Heading, SelectControl, __experimentalHStack as HStack } from '@wordpress/components';
-import { useSelect, useDispatch, dispatch, subscribe, select } from '@wordpress/data';
+import { Card, CardBody, CardHeader, __experimentalHeading as Heading } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useBlockProps } from '@wordpress/block-editor';
+import { init as initYearAndTimeline, Widget as YearAndTimelineWidget } from '../../shared/year_and_timeline.js';
 
 registerBlockType('mve-timeline/year', {
     edit: ({ setAttributes, attributes }) => {
@@ -17,56 +18,9 @@ registerBlockType('mve-timeline/year', {
             []
         );
 
-        const { editEntityRecord } = useDispatch('core');
-
-        const tags = useSelect((select) => {
-            return select('core').getEntityRecords('taxonomy', 'mve_timeline', { orderBy: 'name', 'order': 'asc', 'per_page': -1 }); // name and slug
-        });
-
-        const currentTags = useSelect(
-            (select) => select('core/editor').getEditedPostAttribute('mve_timeline'),
-            []
-        );
-
-        const options = [{
-            value: 0,
-            label: 'Choose timeline...'
-        }].concat(tags ? tags.map((tag) => {
-            return {
-                value: tag.id,
-                label: tag.name
-            };
-        }) : []);
-
-        function onChangeTimeline(value) {
-            value = parseInt(value, 10);
-            editEntityRecord('postType', 'mve_timeline_item', postId, {
-                'mve_timeline': !isNaN(value) ? [parseInt(value, 10)] : [0]
-            });
-        }
-
         const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
-        const valueYear = meta['mve_timeline_year'] ?? '';
-        const valueYearEnd = meta['mve_timeline_year_end'] ?? '';
-
-        const updateYear = (newValue) => {
-            if (newValue === '') {
-                setMeta({ ...meta, mve_timeline_year: null });
-            } else {
-                newValue = parseInt(newValue, 10);
-                setMeta({ ...meta, mve_timeline_year: !isNaN(newValue) ? newValue.toString() : null });
-            }
-        };
-
-        const updateYearEnd = (newValue) => {
-            if (newValue === '') {
-                setMeta({ ...meta, mve_timeline_year_end: null });
-            } else {
-                newValue = parseInt(newValue, 10);
-                setMeta({ ...meta, mve_timeline_year_end: !isNaN(newValue) ? newValue.toString() : null });
-            }
-        };
+        initYearAndTimeline(meta, setMeta, postId);
 
         return (
             <Card {...blockProps}>
@@ -74,11 +28,7 @@ registerBlockType('mve-timeline/year', {
                     <Heading level={4}>Year and timeline</Heading>
                 </CardHeader>
                 <CardBody>
-                    <HStack>
-                        <TextControl onChange={updateYear} value={valueYear} label="Year start" />
-                        <TextControl onChange={updateYearEnd} value={valueYearEnd} label="Year end" />
-                    </HStack>
-                    <SelectControl label="Timeline" options={options} onChange={onChangeTimeline} value={currentTags ? currentTags[0] : ''} />
+                    <YearAndTimelineWidget />
                 </CardBody>
             </Card>
         );
