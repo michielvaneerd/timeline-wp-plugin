@@ -1,9 +1,9 @@
 import { registerBlockType } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
-import { useBlockProps, RichText } from '@wordpress/block-editor';
-import { __experimentalText as Text, Card, CardBody, CardHeader, __experimentalHeading as Heading } from '@wordpress/components';
-
+import { useBlockProps } from '@wordpress/block-editor';
+import { Card, CardBody, CardHeader, __experimentalHeading as Heading } from '@wordpress/components';
+import { init as initIntro, Widget as IntroWidget } from '../../shared/intro.js';
 
 registerBlockType('mve-timeline/intro', {
     edit: ({ setAttributes, attributes }) => {
@@ -15,10 +15,7 @@ registerBlockType('mve-timeline/intro', {
 
         const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
-        const metaFieldValue = meta['mve_timeline_intro'];
-        const updateMetaValue = (newValue) => {
-            setMeta({ ...meta, mve_timeline_intro: newValue });
-        };
+        initIntro(meta, setMeta);
 
         return (
             <Card {...blockProps}>
@@ -26,14 +23,7 @@ registerBlockType('mve-timeline/intro', {
                     <Heading level={4}>Intro</Heading>
                 </CardHeader>
                 <CardBody>
-                <RichText
-                    placeholder="Intro..."
-                    allowedFormats={['core/bold', 'core/italic', 'mve-timeline/internal-link']}
-                    label="MVE Timeline Intro"
-                    value={metaFieldValue}
-                    onChange={updateMetaValue}
-                    style={{backgroundColor: 'white', padding: '1rem', border: '1px solid #C0C0C0'}}
-                />
+                    <IntroWidget />
                 </CardBody>
             </Card>
         );

@@ -1,12 +1,14 @@
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
-import { PanelRow, TextControl, SelectControl, Button, ResponsiveWrapper, __experimentalText as Text, __experimentalVStack as VStack, __experimentalHStack as HStack, ToolbarButton, Popover, Card, CardBody, CheckboxControl } from '@wordpress/components';
+import { PanelRow, TextControl, SelectControl, Button, __experimentalText as Text, __experimentalVStack as VStack, __experimentalHStack as HStack, ToolbarButton, Popover, Card, CardBody, CheckboxControl } from '@wordpress/components';
 import { useSelect, useDispatch, subscribe, select, dispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
-import { MediaUpload, MediaUploadCheck, BlockControls, RichText } from '@wordpress/block-editor';
+import { BlockControls, RichText } from '@wordpress/block-editor';
 import { registerFormatType, toggleFormat, applyFormat } from '@wordpress/rich-text';
 import { useState } from 'react';
-
+import { init as initImage, Widget as ImageWidget } from '../../shared/image.js';
+import { init as initLinks, Widget as LinksWidget } from '../../shared/links.js';
+import { init as initIntro, Widget as IntroWidget } from '../../shared/intro.js';
 
 wp.domReady(() => {
     let locked = false;
@@ -46,8 +48,9 @@ registerPlugin('mve-timeline', {
 
         const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
-        const [linkName, setLinkName] = useState('');
-        const [linkUrl, setLinkUrl] = useState('');
+        initImage(meta, setMeta);
+        initLinks(meta, setMeta);
+        initIntro(meta, setMeta);
 
         const valueYear = meta['mve_timeline_year'] ?? '';
         const valueYearEnd = meta['mve_timeline_year_end'] ?? '';
@@ -70,60 +73,7 @@ registerPlugin('mve-timeline', {
             }
         };
 
-        const imageId = meta['mve_timeline_image'];
-        const imageSource = meta['mve_timeline_image_source'] ?? '';
-        const imageInfo = meta['mve_timeline_image_info'] ?? '';
-        const intro = meta['mve_timeline_intro'];
         const hasContent = meta['mve_timeline_content'] ?? false;
-        let links = meta['mve_timeline_links'];
-        if (!links) {
-            links = [];
-        } else {
-            links = JSON.parse(links); // [{"name": "", "url": ""}]
-        }
-        const addLink = () => {
-            links.push({
-                name: linkName,
-                url: linkUrl
-            });
-            setMeta({ ...meta, mve_timeline_links: JSON.stringify(links) });
-            setLinkName('');
-            setLinkUrl('');
-        };
-        const removeLink = (valueToRemove) => {
-            const newLinks = [];
-            for (const val of links) {
-                if (val.name === valueToRemove.name && val.url === valueToRemove.url) {
-
-                } else {
-                    newLinks.push(val);
-                }
-            }
-            setMeta({ ...meta, mve_timeline_links: JSON.stringify(newLinks) });
-        };
-
-
-        const updateIntro = (newValue) => {
-            setMeta({ ...meta, mve_timeline_intro: newValue });
-        };
-
-        const updateImageId = (newValue) => {
-            const obj = { ...meta, mve_timeline_image: newValue ? newValue.id : null, mve_timeline_image_src: newValue ? JSON.stringify(newValue.sizes) : null };
-            if (!newValue) {
-                obj.mve_timeline_image_source = null;
-                obj.mve_timeline_image_info = null;
-                obj.mve_timeline_image_src = null;
-            }
-            setMeta(obj);
-        };
-
-        const updateImageSource = (newValue) => {
-            setMeta({ ...meta, mve_timeline_image_source: newValue });
-        };
-
-        const updateImageInfo = (newValue) => {
-            setMeta({ ...meta, mve_timeline_image_info: newValue });
-        };
 
         const updateHasContent = (newValue) => {
             setMeta({ ...meta, mve_timeline_content: newValue });
@@ -144,8 +94,6 @@ registerPlugin('mve-timeline', {
                 'mve_timeline': !isNaN(value) ? [parseInt(value, 10)] : []
             });
         }
-
-        const image = useSelect((select) => select('core').getMedia(imageId), [imageId]);
 
         const options = [{
             value: null,
@@ -193,53 +141,23 @@ registerPlugin('mve-timeline', {
                 <PanelRow>
                     <div style={panelStyle}>
                         <VStack>
-                            <MediaUploadCheck>
-                                <Text upperCase={true}>Image</Text>
-                                <MediaUpload
-                                    onSelect={updateImageId}
-                                    allowedTypes={['image']}
-                                    value={imageId}
-                                    render={({ open }) => (<>
-                                        {image && <div style={{ display: 'block' }}><ResponsiveWrapper naturalWidth={image.media_details.width}
-                                            naturalHeight={image.media_details.height}><img src={image.source_url} /></ResponsiveWrapper></div>}
-                                        <div style={{ display: 'block' }}>
-                                            {!image && <Button variant="secondary" onClick={open}>Open Media Library</Button>}
-                                            {image && <Button onClick={() => updateImageId(null)} isLink isDestructive>Remove image</Button>}
-                                        </div>
-
-                                    </>
-                                    )}
-                                />
-                                {image && <TextControl value={imageSource} onChange={updateImageSource} label="Source" />}
-                                {image && <TextControl value={imageInfo} onChange={updateImageInfo} label="Info" />}
-                            </MediaUploadCheck>
+                            <ImageWidget />
                         </VStack>
                     </div>
                 </PanelRow>
                 <PanelRow>
-                <div style={panelStyle}><VStack>
-                <Text upperCase={true}>Intro</Text>
-                    <RichText style={{backgroundColor: 'white'}}
-                        placeholder="Intro..."
-                        allowedFormats={['core/bold', 'core/italic', 'mve-timeline/internal-link']}
-                        label="MVE Timeline Intro"
-                        value={intro}
-                        onChange={updateIntro}
-                    />
-                    </VStack></div>
+                    <div style={panelStyle}>
+                        <VStack>
+                            <Text upperCase={true}>Intro</Text>
+                            <IntroWidget />
+                        </VStack>
+                    </div>
                 </PanelRow>
                 <PanelRow>
                     <div style={panelStyle}>
                         <VStack>
                             <Text upperCase={true}>Links</Text>
-                            <ul style={{ overflowX: 'auto', listStyleType: 'none', padding: 0, margin: 0 }}>
-                                {links.map((link) => (
-                                    <li key={link.url} style={{whiteSpace: 'nowrap'}}><Button isDestructive size="small" onClick={() => removeLink(link)}>X</Button> {link.name} - {link.url}</li>
-                                ))}
-                            </ul>
-                            <TextControl value={linkName} onChange={(newValue) => setLinkName(newValue)} label="Title" />
-                            <TextControl value={linkUrl} onChange={(newValue) => setLinkUrl(newValue)} label="URL" />
-                            <Button size="small" variant="secondary" onClick={addLink} disabled={!(linkName && linkUrl)}>Add link</Button>
+                            <LinksWidget />
                         </VStack>
                     </div>
                 </PanelRow>

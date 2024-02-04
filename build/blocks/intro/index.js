@@ -2,6 +2,54 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/shared/intro.js":
+/*!*****************************!*\
+  !*** ./src/shared/intro.js ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Widget: () => (/* binding */ Widget),
+/* harmony export */   init: () => (/* binding */ init)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/block-editor */ "@wordpress/block-editor");
+/* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__);
+
+
+let _meta,
+  _setMeta,
+  metaFieldValue = null;
+const updateMetaValue = newValue => {
+  _setMeta({
+    ..._meta,
+    mve_timeline_intro: newValue
+  });
+};
+const init = function (meta, setMeta) {
+  _meta = meta;
+  _setMeta = setMeta;
+  metaFieldValue = meta['mve_timeline_intro'];
+};
+const Widget = function () {
+  return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__.RichText, {
+    placeholder: "Intro...",
+    allowedFormats: ['core/bold', 'core/italic', 'mve-timeline/internal-link'],
+    label: "MVE Timeline Intro",
+    value: metaFieldValue,
+    onChange: updateMetaValue,
+    style: {
+      backgroundColor: 'white',
+      padding: '1rem',
+      border: '1px solid #C0C0C0'
+    }
+  });
+};
+
+/***/ }),
+
 /***/ "react":
 /*!************************!*\
   !*** external "React" ***!
@@ -149,6 +197,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_block_editor__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_4__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _shared_intro_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../shared/intro.js */ "./src/shared/intro.js");
+
 
 
 
@@ -163,29 +213,12 @@ __webpack_require__.r(__webpack_exports__);
     const blockProps = (0,_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_4__.useBlockProps)();
     const postType = (0,_wordpress_data__WEBPACK_IMPORTED_MODULE_2__.useSelect)(select => select('core/editor').getCurrentPostType(), []);
     const [meta, setMeta] = (0,_wordpress_core_data__WEBPACK_IMPORTED_MODULE_3__.useEntityProp)('postType', postType, 'meta');
-    const metaFieldValue = meta['mve_timeline_intro'];
-    const updateMetaValue = newValue => {
-      setMeta({
-        ...meta,
-        mve_timeline_intro: newValue
-      });
-    };
+    (0,_shared_intro_js__WEBPACK_IMPORTED_MODULE_6__.init)(meta, setMeta);
     return (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.Card, {
       ...blockProps
     }, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.CardHeader, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.__experimentalHeading, {
       level: 4
-    }, "Intro")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_4__.RichText, {
-      placeholder: "Intro...",
-      allowedFormats: ['core/bold', 'core/italic', 'mve-timeline/internal-link'],
-      label: "MVE Timeline Intro",
-      value: metaFieldValue,
-      onChange: updateMetaValue,
-      style: {
-        backgroundColor: 'white',
-        padding: '1rem',
-        border: '1px solid #C0C0C0'
-      }
-    })));
+    }, "Intro")), (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_components__WEBPACK_IMPORTED_MODULE_5__.CardBody, null, (0,react__WEBPACK_IMPORTED_MODULE_0__.createElement)(_shared_intro_js__WEBPACK_IMPORTED_MODULE_6__.Widget, null)));
   },
   // No information saved to the block.
   // Data is saved to post meta via the hook.
