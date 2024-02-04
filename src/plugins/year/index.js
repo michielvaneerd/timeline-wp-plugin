@@ -12,18 +12,15 @@ wp.domReady(() => {
     let locked = false;
     subscribe(() => {
         const requiredMeta = select('core/editor').getEditedPostAttribute('meta');
-        // const cat = select('core/editor').getEditedPostAttribute('mve_timeline');
-        // console.log(cat);
-        if (requiredMeta) {
-            if (!requiredMeta.mve_timeline_year) {
+        const tag = select('core/editor').getEditedPostAttribute('mve_timeline');
+        if (requiredMeta && tag) {
+            if (!requiredMeta.mve_timeline_year || tag.length === 0) {
                 if (!locked) {
-                    console.log('Lock');
                     locked = true;
                     dispatch('core/editor').lockPostSaving('requiredValueLock');
                 }
             } else {
                 if (locked) {
-                    console.log('Unlock');
                     locked = false;
                     dispatch('core/editor').unlockPostSaving('requiredValueLock');
                 }
@@ -111,7 +108,7 @@ registerPlugin('mve-timeline', {
         };
 
         const updateImageId = (newValue) => {
-            const obj = { ...meta, mve_timeline_image: newValue ? newValue.id : null, mve_timeline_image_src: newValue ? newValue.url : null };
+            const obj = { ...meta, mve_timeline_image: newValue ? newValue.id : null, mve_timeline_image_src: newValue ? JSON.stringify(newValue.sizes) : null };
             if (!newValue) {
                 obj.mve_timeline_image_source = null;
                 obj.mve_timeline_image_info = null;
@@ -141,24 +138,32 @@ registerPlugin('mve-timeline', {
             []
         );
 
-        function onChange(value) {
+        function updateTimeline(value) {
             value = parseInt(value, 10);
             editEntityRecord('postType', 'mve_timeline_item', postId, {
-                'mve_timeline': !isNaN(value) ? [parseInt(value, 10)] : [0]
+                'mve_timeline': !isNaN(value) ? [parseInt(value, 10)] : []
             });
         }
 
         const image = useSelect((select) => select('core').getMedia(imageId), [imageId]);
 
-        const options = tags ? tags.map((tag) => {
+        const options = [{
+            value: null,
+            label: 'Timeline...'
+        }, ...(tags ? tags.map((tag) => {
             return {
                 value: tag.id,
                 label: tag.name
             };
-        }) : [];
+        }) : [])];
 
         const panelStyle = {
             backgroundColor: '#F3F3F3', padding: '.4rem', width: '100%'
+        };
+
+        const requiredMissingStyle = {
+            backgroundColor: 'red',
+            color: 'white'
         };
 
         return (
@@ -166,14 +171,14 @@ registerPlugin('mve-timeline', {
                 <PanelRow>
                     <div style={panelStyle}>
                         <HStack>
-                            <TextControl style={{ borderColor: !valueYear ? 'red' : '' }} onChange={updateYear} value={valueYear} label="Year start" />
+                            <TextControl style={!valueYear ? requiredMissingStyle : null} onChange={updateYear} value={valueYear} label="Year start" />
                             <TextControl onChange={updateYearEnd} value={valueYearEnd} label="Year end" />
                         </HStack>
                     </div>
                 </PanelRow>
                 <PanelRow>
                     <div style={panelStyle}>
-                        <SelectControl label="Timeline" options={options} onChange={onChange} value={currentTags ? currentTags[0] : ''} />
+                        <SelectControl style={(!currentTags || currentTags.length === 0) ? requiredMissingStyle : null} label="Timeline" options={options} onChange={updateTimeline} value={currentTags ? currentTags[0] : ''} />
                     </div>
                 </PanelRow>
                 <PanelRow>

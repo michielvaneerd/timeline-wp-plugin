@@ -98,7 +98,7 @@ add_action('init', function () {
     register_post_meta('mve_timeline_item', 'mve_timeline_image_src', [
         'show_in_rest' => true,
         'single' => true,
-        'type' => 'string'
+        'type' => 'string' // JSON with all sizes
     ]);
 
     // Als ik nu gebruik maak van featured_image, dan kan ik deze mbv gewone API calls ophalen.

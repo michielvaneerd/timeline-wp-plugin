@@ -16,13 +16,12 @@ registerBlockType('mve-timeline/image', {
         const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
         const imageId = meta['mve_timeline_image'];
-        //const imageSrc = meta['mve_timeline_image_src'];
         const imageSource = meta['mve_timeline_image_source'] ?? '';
         const imageInfo = meta['mve_timeline_image_info'] ?? '';
         const image = useSelect((select) => select('core').getMedia(imageId), [imageId]);
 
         const updateImageId = (newValue) => {
-            const obj = { ...meta, mve_timeline_image: newValue ? newValue.id : null, mve_timeline_image_src: newValue ? newValue.url : null };
+            const obj = { ...meta, mve_timeline_image: newValue ? newValue.id : null, mve_timeline_image_src: newValue ? JSON.stringify(newValue.sizes) : null };
             if (!newValue) {
                 obj.mve_timeline_image_source = null;
                 obj.mve_timeline_image_info = null;
