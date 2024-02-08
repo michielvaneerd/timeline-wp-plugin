@@ -16,7 +16,7 @@ export const Widget = function () {
     return (
         <RichText
             placeholder="Intro..."
-            allowedFormats={['core/bold', 'core/italic', 'mve-timeline/internal-link']}
+            allowedFormats={['core/bold', 'core/italic', 'core/link', 'mve-timeline/internal-link']}
             label="MVE Timeline Intro"
             value={metaFieldValue}
             onChange={updateMetaValue}
