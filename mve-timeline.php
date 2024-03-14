@@ -83,6 +83,18 @@ add_action('init', function () {
         'type' => 'string' // Cannot be 'int' because this can be null, which is not allowed for 'int' types apparently...
     ]);
 
+    register_post_meta('mve_timeline_item', 'mve_timeline_year_name', [
+        'show_in_rest' => true,
+        'single' => true,
+        'type' => 'string'
+    ]);
+
+    register_post_meta('mve_timeline_item', 'mve_timeline_year_end_name', [
+        'show_in_rest' => true,
+        'single' => true,
+        'type' => 'string'
+    ]);
+
     register_post_meta('mve_timeline_item', 'mve_timeline_content', [
         'show_in_rest' => true,
         'single' => true,
@@ -139,10 +151,59 @@ add_action('init', function () {
         'show_in_menu' => true,
     ]);
 
-    //$post_type_object = get_post_type_object( 'post' );
-    //echo '<pre>'; var_dump($post_type_object); exit;
-
 });
+
+// Show published field for mve_timeline taxonomy
+add_action('admin_init', function () {
+    add_filter('manage_mve_timeline_custom_column', function ($row, $column_name, $term_id) {
+        $value = get_term_meta($term_id, 'mve_timeline_published', true);
+        if ('mve_timeline_published' === $column_name) {
+            return $row . ($value ? 'Yes' : 'No');
+        }
+    }, 15, 3);
+    add_filter('manage_edit-mve_timeline_columns', function ($original_columns) {
+        $new_columns = $original_columns;
+        array_splice($new_columns, 2);
+        $new_columns['mve_timeline_published'] = 'Published';
+        return array_merge($new_columns, $original_columns);
+    });
+});
+
+
+// Add published field to mve_timeline taxonomy
+function mve_mve_timeline_show_published_field($term)
+{
+    if (is_string($term)) {
+?>
+        <div class="form-field">
+            <label for="mve_timeline_published">Published?</label>
+            <input type="checkbox" name="mve_timeline_published" id="mve_timeline_published">
+        </div>
+    <?php
+    } else {
+        $value = get_term_meta($term->term_id, 'mve_timeline_published', true);
+    ?>
+        <tr class="form-field">
+            <th><label for="mve_timeline_published">Published?</label></th>
+            <td><input type="checkbox" name="mve_timeline_published" id="mve_timeline_published" <?php checked(1, $value); ?>></td>
+        </tr>
+<?php
+    }
+}
+add_action('mve_timeline_add_form_fields', 'mve_mve_timeline_show_published_field');
+add_action('mve_timeline_edit_form_fields', 'mve_mve_timeline_show_published_field');
+
+// Save published field of mve_timeline taxonomy
+function mve_timeline_saved($term_id)
+{
+    if (empty($_POST['mve_timeline_published'])) {
+        delete_term_meta($term_id, 'mve_timeline_published');
+    } else {
+        update_term_meta($term_id, 'mve_timeline_published', 1);
+    }
+}
+add_action('created_mve_timeline', 'mve_timeline_saved');
+add_action('edited_mve_timeline', 'mve_timeline_saved');
 
 // Make sure no one can unlock the blocks for mve timeline.
 // add_filter('block_editor_settings_all', function ($settings, $context) {
@@ -172,6 +233,23 @@ add_filter('single_template', function ($template) {
     return $template;
 });
 
+// Make sure to only return the published taxonomies if mve_timeline_published is present and not empty in the request.
+add_filter('rest_mve_timeline_query', function($args, $request) {
+    if (empty($request['mve_timeline_published'])) {
+        return $args;
+    }
+    if (!empty($args['meta_query'])) {
+        $args['meta_query']['relation'] = 'AND';   
+    } else {
+        $args['meta_query'] = [];
+    }
+    $args['meta_query'][] = [
+        'key' => 'mve_timeline_published',
+        'value' => 1
+    ];
+    return $args;
+}, 10, 2);
+
 add_action('rest_api_init', function () {
 
     // We need to add the un-rendered title, because otherwise some characters will be rewritten to HTML entities.
@@ -182,6 +260,12 @@ add_action('rest_api_init', function () {
         'schema' => [
             'type' => 'string'
         ]
+    ]);
+
+    register_term_meta('mve_timeline', 'mve_timeline_published', [
+        'single' => true,
+        'show_in_rest' => true,
+        'type' => 'integer'
     ]);
 
     //     // register_rest_route('mve-timeline/v1', '/timelines', [
@@ -347,7 +431,8 @@ add_filter('manage_mve_timeline_item_posts_columns', function ($columns) {
 add_action('manage_mve_timeline_item_posts_custom_column', function ($column, $post_id) {
     switch ($column) {
         case 'mve_timeline_year':
-            echo get_post_meta($post_id, 'mve_timeline_year', true);
+            $name = get_post_meta($post_id, 'mve_timeline_year_name', true);
+            echo get_post_meta($post_id, 'mve_timeline_year', true) . (!empty($name) ? (' (' . $name . ')') : '');
             break;
     }
 }, 10, 2);

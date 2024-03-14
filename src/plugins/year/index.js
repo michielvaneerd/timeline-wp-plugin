@@ -45,7 +45,7 @@ registerPlugin('mve-timeline', {
             []
         );
 
-        const { editEntityRecord } = useDispatch('core');
+        //const { editEntityRecord } = useDispatch('core');
 
         const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 

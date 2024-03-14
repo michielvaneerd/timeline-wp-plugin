@@ -10,10 +10,11 @@ figure {
     margin:0;
 }
 
-figure.wp-block-image.size-large img {
+figure.wp-block-image.size-large img, img.wp-post-image {
     display: block;
+    height: auto !important;
+    width: auto !important;
     max-width: 100%;
-    height: auto;
 }
 
 body > h1:first-child {
