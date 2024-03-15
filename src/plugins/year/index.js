@@ -45,14 +45,16 @@ registerPlugin('mve-timeline', {
             []
         );
 
-        //const { editEntityRecord } = useDispatch('core');
-
         const [meta, setMeta] = useEntityProp('postType', postType, 'meta');
 
         initImage(meta, setMeta);
         initLinks(meta, setMeta);
         initIntro(meta, setMeta);
         initYearAndTimeline(meta, setMeta, postId);
+
+        if (postType !== 'mve_timeline_item') {
+            return null;
+        }
 
         const hasContent = meta['mve_timeline_content'] ?? false;
 

@@ -500,3 +500,21 @@ add_action('pre_delete_attachment', function ($delete, $post, $force_delete) {
     // Is this image used in a post meta image?
     //return false; // Return false will forbid the deletion.
 }, 10, 3);
+
+add_filter('allowed_block_types_all', function ($allowed_block_types, $editor_context) {
+    if ($editor_context->post->post_type !== 'mve_timeline_item') {
+        $all_blocks = [];
+        $registered_blocks = WP_Block_Type_Registry::get_instance()->get_all_registered();
+        foreach ($registered_blocks as $registered_block) {
+            $all_blocks[] = $registered_block->name;
+        }
+        $disallowed_blocks = [
+            'mve-timeline/image',
+            'mve-timeline/year',
+            'mve-timeline/intro',
+            'mve-timeline/links'
+        ];
+        return array_values(array_diff($all_blocks, $disallowed_blocks));
+    }
+    return $allowed_block_types;
+}, 10, 2);
