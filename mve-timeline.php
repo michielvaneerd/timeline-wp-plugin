@@ -150,7 +150,6 @@ add_action('init', function () {
         'show_in_nav_menus' => true,
         'show_in_menu' => true,
     ]);
-
 });
 
 // Show published field for mve_timeline taxonomy
@@ -234,12 +233,12 @@ add_filter('single_template', function ($template) {
 });
 
 // Make sure to only return the published taxonomies if mve_timeline_published is present and not empty in the request.
-add_filter('rest_mve_timeline_query', function($args, $request) {
+add_filter('rest_mve_timeline_query', function ($args, $request) {
     if (empty($request['mve_timeline_published'])) {
         return $args;
     }
     if (!empty($args['meta_query'])) {
-        $args['meta_query']['relation'] = 'AND';   
+        $args['meta_query']['relation'] = 'AND';
     } else {
         $args['meta_query'] = [];
     }
@@ -461,6 +460,26 @@ add_action('enqueue_block_assets', function () {
             plugins_url('editor-styles.css', __FILE__)
         );
     }
+});
+
+add_action('restrict_manage_posts', function ($post_type) {
+    if ($post_type !== 'mve_timeline_item') {
+        return;
+    }
+    $tax = 'mve_timeline';
+    $taxonomy_object = get_taxonomy($tax);
+    $selected = !empty($_GET[$tax]) ? $_GET[$tax] : '';
+    wp_dropdown_categories(
+        array(
+            'show_option_all' =>  $taxonomy_object->labels->all_items,
+            'taxonomy'        =>  $tax,
+            'name'            =>  $tax,
+            'orderby'         =>  'name',
+            'value_field'     =>  'slug',
+            'selected'        =>  $selected,
+            'hierarchical'    =>  true,
+        )
+    );
 });
 
 // add_filter('allowed_block_types', function($allowed_block_types, $post) {
