@@ -1,0 +1,6 @@
+{
+    "apiVersion": 3,
+    "title": "MVE Timeline Sidebar Plugin Year2",
+    "name": "mve-timeline-year2",
+    "editorScript": "file:./index.js"
+}

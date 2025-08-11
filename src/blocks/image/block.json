@@ -1,0 +1,11 @@
+{
+    "apiVersion": 3,
+    "title": "MVE Timeline Image",
+    "name": "mve-timeline/image",
+    "category": "widgets",
+    "icon": "smiley",
+    "editorScript": "file:./index.js",
+    "supports": {
+        "multiple": false
+    }
+}

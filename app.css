@@ -1,0 +1,24 @@
+body {
+    background-color: white;
+    font-family: 'Roboto', sans-serif;
+    padding: 1rem;
+    font-size: 140%;
+}
+
+figure {
+    padding:0;
+    margin:0;
+}
+
+figure.wp-block-image.size-large img, img.wp-post-image {
+    display: block;
+    height: auto !important;
+    width: auto !important;
+    max-width: 100%;
+}
+
+body > h1:first-child {
+    padding:0;
+    margin:0;
+    margin-bottom:1rem;
+}
