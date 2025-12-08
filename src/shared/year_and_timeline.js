@@ -85,13 +85,13 @@ export const init = function (meta, setMeta, postId) {
 export const Widget = function () {
     return (<>
         <HStack>
-            <TextControl style={!valueYear ? requiredMissingStyle : null} onChange={updateYear} value={valueYear} label="Year start *" />
-            <TextControl onChange={updateYearEnd} value={valueYearEnd} label="Year end" />
+            <TextControl __nextHasNoMarginBottom={true} __next40pxDefaultSize={true} style={!valueYear ? requiredMissingStyle : null} onChange={updateYear} value={valueYear} label="Year start *" />
+            <TextControl __nextHasNoMarginBottom={true} __next40pxDefaultSize={true} onChange={updateYearEnd} value={valueYearEnd} label="Year end" />
         </HStack>
         <HStack>
-            <TextControl onChange={updateYearName} value={valueYearName} label="Year start name" />
-            <TextControl onChange={updateYearEndName} value={valueYearEndName} label="Year end name" />
+            <TextControl __nextHasNoMarginBottom={true} __next40pxDefaultSize={true} onChange={updateYearName} value={valueYearName} label="Year start name" />
+            <TextControl __nextHasNoMarginBottom={true} __next40pxDefaultSize={true} onChange={updateYearEndName} value={valueYearEndName} label="Year end name" />
         </HStack>
-        <SelectControl style={(!currentTags || currentTags.length === 0 || currentTags[0] === 0) ? requiredMissingStyle : null} label="Timeline *" options={options} onChange={onChangeTimeline} value={currentTags ? currentTags[0] : ''} />
+        <SelectControl __nextHasNoMarginBottom={true} __next40pxDefaultSize={true} style={(!currentTags || currentTags.length === 0 || currentTags[0] === 0) ? requiredMissingStyle : null} label="Timeline *" options={options} onChange={onChangeTimeline} value={currentTags ? currentTags[0] : ''} />
     </>);
 };

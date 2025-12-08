@@ -1,5 +1,5 @@
 import { registerPlugin } from '@wordpress/plugins';
-import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
+import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { PanelRow, SelectControl, __experimentalText as Text, __experimentalVStack as VStack, ToolbarButton, Popover, Card, CardBody, CheckboxControl } from '@wordpress/components';
 import { useSelect, useDispatch, subscribe, select, dispatch } from '@wordpress/data';
 import { useEntityProp } from '@wordpress/core-data';
@@ -77,7 +77,7 @@ registerPlugin('mve-timeline', {
                 </PanelRow>
                 <PanelRow>
                     <div style={panelStyle}>
-                        <CheckboxControl
+                        <CheckboxControl __nextHasNoMarginBottom={true}
                             label="Has content"
                             checked={hasContent}
                             onChange={updateHasContent}
@@ -113,7 +113,7 @@ registerPlugin('mve-timeline', {
 });
 
 const MyPageList = ({ pages, onChange, value }) => {
-    return <SelectControl style={{ minWidth: '300px' }} __nextHasNoMarginBottom value={value} label="Select page" onChange={onChange} options={pages.map(function (page) {
+    return <SelectControl __nextHasNoMarginBottom={true} __next40pxDefaultSize={true} style={{ minWidth: '300px' }} value={value} label="Select page" onChange={onChange} options={pages.map(function (page) {
         return { value: page.id, label: `${page.meta.mve_timeline_year} - ${page.title.raw}` };
     })} />
 };

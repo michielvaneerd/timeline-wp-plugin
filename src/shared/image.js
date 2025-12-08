@@ -28,7 +28,8 @@ export const init = function (meta, setMeta) {
     imageId = meta['mve_timeline_image'];
     imageSource = meta['mve_timeline_image_source'] ?? '';
     imageInfo = meta['mve_timeline_image_info'] ?? '';
-    image = useSelect((select) => select('core').getMedia(imageId), [imageId]);
+    //image = useSelect((select) => select('core').getMedia(imageId), [imageId]);
+    image = useSelect((select) => select('core').getEntityRecord('postType', 'attachment', imageId), [imageId]);
 };
 
 export const Widget = function () {
@@ -50,8 +51,8 @@ export const Widget = function () {
                 </>
                 )}
             />
-            {image && <TextControl value={imageSource} onChange={updateImageSource} label="Source" />}
-            {image && <TextControl value={imageInfo} onChange={updateImageInfo} label="Info" />}
+            {image && <TextControl __nextHasNoMarginBottom={true} __next40pxDefaultSize={true} value={imageSource} onChange={updateImageSource} label="Source" />}
+            {image && <TextControl __nextHasNoMarginBottom={true} __next40pxDefaultSize={true} value={imageInfo} onChange={updateImageInfo} label="Info" />}
         </MediaUploadCheck>
     );
 };

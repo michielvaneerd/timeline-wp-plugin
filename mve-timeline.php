@@ -1,4 +1,14 @@
 <?php
+/*
+Plugin Name: Mve Timeline
+Description: Create timelines
+Version: 20251208
+Author: Michiel van Eerd
+Author URI: https://www.michielvaneerd.nl/
+Requires at least: 4.6
+Requires PHP: 5.4.0
+License: GPL2
+*/
 
 /*
  * Plugin Name: MVE Timeline

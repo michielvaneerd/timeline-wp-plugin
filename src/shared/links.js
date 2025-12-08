@@ -51,8 +51,8 @@ export const Widget = function () {
             ))}
         </ul>
 
-            <TextControl value={valueName} onChange={(newValue) => setValueName(newValue)} label="Title" />
-            <TextControl value={valueUrl} onChange={(newValue) => setValueUrl(newValue)} label="URL" />
+            <TextControl __nextHasNoMarginBottom={true} __next40pxDefaultSize={true} value={valueName} onChange={(newValue) => setValueName(newValue)} label="Title" />
+            <TextControl __nextHasNoMarginBottom={true} __next40pxDefaultSize={true} value={valueUrl} onChange={(newValue) => setValueUrl(newValue)} label="URL" />
             <Button size="small" variant="secondary" onClick={addMetaValue} disabled={!(valueName && valueUrl)}>Add link</Button></>
     );
 };
