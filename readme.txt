@@ -39,6 +39,8 @@ App
 
 The first thing to do when opening the app, is to add the host of the Wordpress site that contains the timelines content. Just add the root of the host for your Wordpress site, for example https://www.mysite.com.
 
+You don't need to be authenticated to be able to view timelines, you just need to know the hostname. If you want to edit timelines items from within the app, you need to have a XXX token.
+
 = Features =
 
 * Create timelines

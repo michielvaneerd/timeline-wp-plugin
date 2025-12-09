@@ -33,6 +33,8 @@ add_action('init', function () {
         'public' => true,
         'has_archive' => true,
         'show_in_rest' => true,
+        'capability_type' => 'post',
+        'map_meta_cap' => true,
         'supports' => [
             'title',
             'editor',
