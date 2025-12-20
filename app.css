@@ -6,19 +6,20 @@ body {
 }
 
 figure {
-    padding:0;
-    margin:0;
+    padding: 0;
+    margin: 0;
 }
 
-figure.wp-block-image.size-large img, img.wp-post-image {
+figure.wp-block-image img,
+img.wp-post-image {
     display: block;
     height: auto !important;
     width: auto !important;
     max-width: 100%;
 }
 
-body > h1:first-child {
-    padding:0;
-    margin:0;
-    margin-bottom:1rem;
+body>h1:first-child {
+    padding: 0;
+    margin: 0;
+    margin-bottom: 1rem;
 }

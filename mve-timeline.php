@@ -273,6 +273,23 @@ add_action('rest_api_init', function () {
         ]
     ]);
 
+    // register_rest_field('mve_timeline', 'year_name_start', [
+    //     'get_callback' => function ($arr) {
+    //         $timelineId = $arr['id'];
+    //         $firstPost = get_post([
+    //             'post_type' => 'mve_timeline_item',
+    //             'posts_per_page' => 1,
+    //             'order' => 'ASC',
+    //             'numberposts' => -1
+    //         ]);
+    //         var_dump($firstPost);
+    //         return get_post_meta($firstPost->ID, 'mve_timeline_year', single: true);
+    //     },
+    //     'schema' => [
+    //         'type' => 'string'
+    //     ]
+    // ]);
+
     register_term_meta('mve_timeline', 'mve_timeline_published', [
         'single' => true,
         'show_in_rest' => true,
